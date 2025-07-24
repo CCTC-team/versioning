@@ -1,0 +1,58 @@
+{
+  "name": "Versioning",
+  "description": "Module that supports versioning a project to help manage amendments",
+  "namespace": "CCTC\\VersioningModule",
+  "framework-version": 14,
+  "authors": [
+    {
+      "name": "Richard Hardy",
+      "email": "rmh54@cam.ac.uk",
+      "institution": "University of Cambridge - Cambridge Cancer Trials Centre"
+    }
+  ],
+  "links": {
+    "project": [
+      {
+        "name": "Versioning",
+        "key": "versioning",
+        "icon": "fas fa-sun",
+        "url": "index.php",
+        "show-header-and-footer": true
+      }
+    ]
+  },
+  "system-settings": [
+  ],
+  "project-settings": [
+    {
+      "key": "versioning-field-suffix",
+      "name": "Provide the suffix used to identify the version field on a form. Any field name can be used as long as it ends with the given suffix. For example, to use the form name as the prefix, replace any spaces with _ and then add the suffix; i.e. with the suffix '_crfver', the crf version field for the form 'Patient Details' would be called 'patient_details_crfver'",
+      "type": "text",
+      "repeatable": false,
+      "required": true,
+      "super-users-only": true
+    },
+    {
+      "key": "current-project-version",
+      "name": "The current crf version. When updated, any new forms containing a field with the given suffix will automatically be updated with this value",
+      "type": "text",
+      "repeatable": false,
+      "required": true,
+      "super-users-only": true
+    },
+    {
+      "key": "version-field-auto-set-as-readonly",
+      "name": "If checked, any fields identified as versioning fields will be automatically set as readonly",
+      "type": "checkbox",
+      "repeatable": false,
+      "required": false,
+      "super-users-only": true
+    }
+  ],
+  "compatibility": {
+    "php-version-min": "8.0.27",
+    "php-version-max": "8.2",
+    "redcap-version-min": "13.8.1",
+    "redcap-version-max": "14.7.0"
+  }
+}
