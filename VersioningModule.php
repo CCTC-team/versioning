@@ -11,30 +11,28 @@ class VersioningModule extends AbstractExternalModule {
     const PipingFilePath = APP_PATH_DOCROOT . "/Classes/Piping.php";
     const PipingCode =
         '//****** inserted by Versioning module ******
- case "em-project-setting-value" :
-                        //TODO: check when going from 9 to 10 as the value may be compared by string not int!!!
-                        //NOTE: the above is fine - php automatically compares the values numerically
+                    case "em-project-setting-value" :
                         $wrapThisItem = true;
                         $module = $matches[\'param1\'][0];
                         $projSettingKey = $matches[\'param2\'][0];
 
                         $sql = "select
-    b.value as settingValue
-from
-    redcap_external_modules a,
-    redcap_external_module_settings b
-where
-    a.external_module_id = b.external_module_id
-    and a.directory_prefix = \'$module\'
-    and b.project_id = $project_id
-    and b.`key` = \'$projSettingKey\'";
-                        $q = db_query($sql);
-                        if (db_num_rows($q)) {
-                            $res = db_result($q, 0);
-                            $matches[\'post-pipe\'][$key] = $res;
-                        }
-
-                        break;//****** end of insert ******' . PHP_EOL;
+                                    b.value as settingValue
+                                from
+                                    redcap_external_modules a,
+                                    redcap_external_module_settings b
+                                where
+                                    a.external_module_id = b.external_module_id
+                                    and a.directory_prefix = \'$module\'
+                                    and b.project_id = $project_id
+                                    and b.`key` = \'$projSettingKey\'";
+                                                        $q = db_query($sql);
+                                                        if (db_num_rows($q)) {
+                                                            $res = db_result($q, 0);
+                                                            $matches[\'post-pipe\'][$key] = $res;
+                                                        }
+                        break;
+        //****** end of insert ******' . PHP_EOL;
     const PipingSearchTerm = '      $matches[\'post-pipe\'][$key] = "<a href=\"$participant_url\" target=\"_blank\">" . RCView::escape($link_text) . "</a>";
                             }
                         } else {

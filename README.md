@@ -11,7 +11,47 @@ current version. This is handled by a simple javascript script so if the user ch
 no prompt to save it unless further data has also been entered. The versioning field is not updated if already entered,
 so it retains the version of the form when first saved.
 
-#### Set up and configuration ####
+#### System set up ####
+
+Enabling the module at a system level will AUTOMATICALLY do the following via the system hook
+`redcap_module_system_enable`;
+
+1. Insert code in the `Piping.php` file - the following is inserted after the switch case statement `case "mycap-participant-link" :` around line 2036
+    ```php
+    //****** inserted by Versioning module ******
+                    case "em-project-setting-value" :
+                        $wrapThisItem = true;
+                        $module = $matches['param1'][0];
+                        $projSettingKey = $matches['param2'][0];
+
+                        $sql = "select
+                                    b.value as settingValue
+                                from
+                                    redcap_external_modules a,
+                                    redcap_external_module_settings b
+                                where
+                                    a.external_module_id = b.external_module_id
+                                    and a.directory_prefix = '$module'
+                                    and b.project_id = $project_id
+                                    and b.`key` = '$projSettingKey'";
+                                                        $q = db_query($sql);
+                                                        if (db_num_rows($q)) {
+                                                            $res = db_result($q, 0);
+                                                            $matches['post-pipe'][$key] = $res;
+                                                        }
+                        break;
+        //****** end of insert ******
+    ```
+  This makes the versioning parameter `em-project-setting-value:versioning:current-project-version]` available for use in the instruments in projects.
+
+Disabling the module at a system level will AUTOMATICALLY do the following via the system hook
+`redcap_module_system_disable`.
+1. Remove the code inserted into `Piping.php`
+
+When a new version of the module becomes available, the module should be disabled and then re-enabled from the Control Center at the system level. Failure to do so may cause the module to malfunction.
+
+#### Set up and configuration by project####
+
 
 Set up is straightforward and there are just a few project level settings.
 
