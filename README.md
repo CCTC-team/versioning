@@ -48,7 +48,7 @@ Disabling the module at a system level will AUTOMATICALLY do the following via t
 `redcap_module_system_disable`.
 1. Remove the code inserted into `Piping.php`
 
-When a new version of the module becomes available, it is recommended to disable and then re-enable the module from the Control Center.
+When a new version of the module becomes available, it should be disable and then re-enable from the Control Center. Failure to do so may result in the module to malfunction.
 
 #### Set up and configuration by project####
 
