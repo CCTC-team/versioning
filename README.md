@@ -42,7 +42,7 @@ Enabling the module at a system level will AUTOMATICALLY do the following via th
                         break;
         //****** end of insert ******
     ```
-  This makes the versioning parameter `em-project-setting-value:versioning:current-project-version]` available for use in the instruments in projects.
+  This makes the versioning parameter `[em-project-setting-value:versioning:current-project-version]` available for use in the instruments in projects.
 
 Disabling the module at a system level will AUTOMATICALLY do the following via the system hook
 `redcap_module_system_disable`.
