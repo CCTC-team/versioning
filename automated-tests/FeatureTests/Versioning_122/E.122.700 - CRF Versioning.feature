@@ -15,19 +15,19 @@ Feature: E.122.700 - The system shall support the ability to setup CRF versionin
 
     Given I click on the link labeled exactly "Manage"
     Then I should see "External Modules - Module Manager"
-    And I should NOT see "Versioning - v0.0.0"
+    And I should NOT see "Versioning - v1.0.0"
     When I click on the button labeled "Enable a module"
     And I click on the button labeled Enable for the external module named "Versioning"
     And I click on the button labeled "Enable" in the dialog box
-    Then I should see "Versioning - v0.0.0"
+    Then I should see "Versioning - v1.0.0"
  
   Scenario: Enable external module in project
     Given I create a new project named "E.122.700" by clicking on "New Project" in the menu bar, selecting "Practice / Just for fun" from the dropdown, choosing file "redcap_val/E122700.xml", and clicking the "Create Project" button
     And I click on the link labeled exactly "Manage"
     Then I should see "External Modules - Project Module Manager"
     When I click on the button labeled "Enable a module"
-    And I click on the button labeled Enable for the external module named "Versioning - v0.0.0"
-    Then I should see "Versioning - v0.0.0"
+    And I click on the button labeled Enable for the external module named "Versioning - v1.0.0"
+    Then I should see "Versioning - v1.0.0"
 
     # E.122.700, E.122.900 - Only Super-admins can configure external Module
     Given I click on the button labeled "Configure"
@@ -35,7 +35,7 @@ Feature: E.122.700 - The system shall support the ability to setup CRF versionin
     When I enter "crfver" into the input field labeled "Provide the suffix"
     And I enter "0" into the input field labeled "The current crf version"
     Then I click on the button labeled "Save" in the dialog box
-    Then I should see "Versioning - v0.0.0"
+    Then I should see "Versioning - v1.0.0"
     When I click on the link labeled "Versioning"
     Then I should see "The current version is 0"
 
@@ -46,7 +46,7 @@ Feature: E.122.700 - The system shall support the ability to setup CRF versionin
     # negative values can be entered
     And I clear field and enter "-1" into the input field labeled "The current crf version"
     Then I click on the button labeled "Save" in the dialog box
-    Then I should see "Versioning - v0.0.0"
+    Then I should see "Versioning - v1.0.0"
     When I click on the link labeled "Versioning"
     Then I should see "The current version is -1"
 
@@ -56,7 +56,7 @@ Feature: E.122.700 - The system shall support the ability to setup CRF versionin
     Then I should see "Configure Module" in the dialog box
     And I clear field and enter "1" into the input field labeled "The current crf version"
     Then I click on the button labeled "Save" in the dialog box
-    Then I should see "Versioning - v0.0.0"
+    Then I should see "Versioning - v1.0.0"
     When I click on the link labeled "Versioning"
     Then I should see "The current version is 1"
 
@@ -120,7 +120,7 @@ Feature: E.122.700 - The system shall support the ability to setup CRF versionin
     And I click on the button labeled "Configure"
     And I check the checkbox labeled "If checked, any fields identified as versioning fields will be automatically set as readonly"
     And I click on the button labeled "Save" in the dialog box
-    Then I should see "Versioning - v0.0.0"
+    Then I should see "Versioning - v1.0.0"
 
     # Version number should be an integer
     Given I click on the link labeled "Versioning"
@@ -175,7 +175,7 @@ Feature: E.122.700 - The system shall support the ability to setup CRF versionin
     Then I should see "3"
     When I clear field and enter "5" into the input field labeled "The current crf version"
     And I click on the button labeled "Save" in the dialog box
-    Then I should see "Versioning - v0.0.0"
+    Then I should see "Versioning - v1.0.0"
 
   Scenario: E.122.1000, E.122.1100 - Versioning for Repeating Instruments in Arm 1
     # Repeating Instruments - Instance 1
@@ -227,20 +227,20 @@ Feature: E.122.700 - The system shall support the ability to setup CRF versionin
     # Disable external module in project
     Given I click on the link labeled exactly "Manage"
     Then I should see "External Modules - Project Module Manager"
-    And I should see "Versioning - v0.0.0"
+    And I should see "Versioning - v1.0.0"
     When I click on the button labeled exactly "Disable"
     Then I should see "Disable module?" in the dialog box
     When I click on the button labeled "Disable module" in the dialog box
-    Then I should NOT see "Versioning - v0.0.0"
+    Then I should NOT see "Versioning - v1.0.0"
 
     Given I click on the link labeled "Logging"
     Then I should see a table header and row containing the following values in the logging table:
       | Time / Date      | Username   | Action                                                                   | List of Data Changes OR Fields Exported                                                                                             |
-      | mm/dd/yyyy hh:mm | test_admin | Disable external module "versioning_v0.0.0" for project                  |                                                                                                                                     |
-      | mm/dd/yyyy hh:mm | test_admin | Modify configuration for external module "versioning_v0.0.0" for project | version-field-auto-set-as-readonly                                                                                                  |
-      | mm/dd/yyyy hh:mm | test_admin | Modify configuration for external module "versioning_v0.0.0" for project | current-project-version                                                                                                             |
-      | mm/dd/yyyy hh:mm | test_admin | Modify configuration for external module "versioning_v0.0.0" for project | reserved-hide-from-non-admins-in-project-list, versioning-field-suffix, current-project-version, version-field-auto-set-as-readonly |
-      | mm/dd/yyyy hh:mm | test_admin | Enable external module "versioning_v0.0.0" for project                   |                                                                                                                                     |
+      | mm/dd/yyyy hh:mm | test_admin | Disable external module "versioning_v1.0.0" for project                  |                                                                                                                                     |
+      | mm/dd/yyyy hh:mm | test_admin | Modify configuration for external module "versioning_v1.0.0" for project | version-field-auto-set-as-readonly                                                                                                  |
+      | mm/dd/yyyy hh:mm | test_admin | Modify configuration for external module "versioning_v1.0.0" for project | current-project-version                                                                                                             |
+      | mm/dd/yyyy hh:mm | test_admin | Modify configuration for external module "versioning_v1.0.0" for project | reserved-hide-from-non-admins-in-project-list, versioning-field-suffix, current-project-version, version-field-auto-set-as-readonly |
+      | mm/dd/yyyy hh:mm | test_admin | Enable external module "versioning_v1.0.0" for project                   |                                                                                                                                     |
 
     # Disable external module in Control Center
     Given I click on the link labeled "Control Center"
@@ -248,7 +248,7 @@ Feature: E.122.700 - The system shall support the ability to setup CRF versionin
     And I click on the button labeled exactly "Disable"
     Then I should see "Disable module?" in the dialog box
     When I click on the button labeled "Disable module" in the dialog box
-    Then I should NOT see "Versioning - v0.0.0"
+    Then I should NOT see "Versioning - v1.0.0"
 
     # Not checking 'Delete Version' for now as this is used for deleting lower versions.
     # If the entire EM is deleted REDCap throws an error
@@ -256,11 +256,11 @@ Feature: E.122.700 - The system shall support the ability to setup CRF versionin
     Given I click on the link labeled "User Activity Log"
     Then I should see a table header and row containing the following values in a table:
       | Time             | User       | Event                                                                    |
-      | mm/dd/yyyy hh:mm | test_admin | Disable external module "versioning_v0.0.0" for system                   |
-      | mm/dd/yyyy hh:mm | test_admin | Disable external module "versioning_v0.0.0" for project                  |
-      | mm/dd/yyyy hh:mm | test_admin | Modify configuration for external module "versioning_v0.0.0" for project |
-      | mm/dd/yyyy hh:mm | test_admin | Enable external module "versioning_v0.0.0" for project                   |
-      | mm/dd/yyyy hh:mm | test_admin | Enable external module "versioning_v0.0.0" for system                    |
+      | mm/dd/yyyy hh:mm | test_admin | Disable external module "versioning_v1.0.0" for system                   |
+      | mm/dd/yyyy hh:mm | test_admin | Disable external module "versioning_v1.0.0" for project                  |
+      | mm/dd/yyyy hh:mm | test_admin | Modify configuration for external module "versioning_v1.0.0" for project |
+      | mm/dd/yyyy hh:mm | test_admin | Enable external module "versioning_v1.0.0" for project                   |
+      | mm/dd/yyyy hh:mm | test_admin | Enable external module "versioning_v1.0.0" for system                    |
     
     And I logout
 
