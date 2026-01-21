@@ -13,17 +13,17 @@ Feature: E.122.700 - The system shall support the ability to setup CRF versionin
     And I click on the button labeled "Save Changes"
     Then I should see "Your system configuration values have now been changed"
 
-    Given I click on the link labeled exactly "Manage"
+    Given I click on the link labeled "Manage"
     Then I should see "External Modules - Module Manager"
     And I should NOT see "Versioning - v1.0.0"
     When I click on the button labeled "Enable a module"
     And I click on the button labeled Enable for the external module named "Versioning"
-    And I click on the button labeled "Enable" in the dialog box
+    And I click on the button labeled "Enable"
     Then I should see "Versioning - v1.0.0"
  
   Scenario: Enable external module in project
-    Given I create a new project named "E.122.700" by clicking on "New Project" in the menu bar, selecting "Practice / Just for fun" from the dropdown, choosing file "redcap_val/E122700.xml", and clicking the "Create Project" button
-    And I click on the link labeled exactly "Manage"
+    Given I create a new project named "E.122.700" by clicking on "New Project" in the menu bar, selecting "Practice / Just for fun" from the dropdown, choosing file "fixtures/cdisc_files/E122700.xml", and clicking the "Create Project" button
+    And I click on the link labeled "Manage"
     Then I should see "External Modules - Project Module Manager"
     When I click on the button labeled "Enable a module"
     And I click on the button labeled Enable for the external module named "Versioning - v1.0.0"
@@ -31,31 +31,31 @@ Feature: E.122.700 - The system shall support the ability to setup CRF versionin
 
     # E.122.700, E.122.900 - Only Super-admins can configure external Module
     Given I click on the button labeled "Configure"
-    Then I should see "Configure Module" in the dialog box
+    Then I should see "Configure Module"
     When I enter "crfver" into the input field labeled "Provide the suffix"
     And I enter "0" into the input field labeled "The current crf version"
-    Then I click on the button labeled "Save" in the dialog box
+    Then I click on the button labeled "Save"
     Then I should see "Versioning - v1.0.0"
     When I click on the link labeled "Versioning"
     Then I should see "The current version is 0"
 
     # Super-Admins can down-version
-    Given I click on the link labeled exactly "Manage"
+    Given I click on the link labeled "Manage"
     When I click on the button labeled "Configure"
-    Then I should see "Configure Module" in the dialog box
+    Then I should see "Configure Module"
     # negative values can be entered
     And I clear field and enter "-1" into the input field labeled "The current crf version"
-    Then I click on the button labeled "Save" in the dialog box
+    Then I click on the button labeled "Save"
     Then I should see "Versioning - v1.0.0"
     When I click on the link labeled "Versioning"
     Then I should see "The current version is -1"
 
     # Upversion from configuration settings
-    Given I click on the link labeled exactly "Manage"
+    Given I click on the link labeled "Manage"
     When I click on the button labeled "Configure"
-    Then I should see "Configure Module" in the dialog box
+    Then I should see "Configure Module"
     And I clear field and enter "1" into the input field labeled "The current crf version"
-    Then I click on the button labeled "Save" in the dialog box
+    Then I click on the button labeled "Save"
     Then I should see "Versioning - v1.0.0"
     When I click on the link labeled "Versioning"
     Then I should see "The current version is 1"
@@ -75,17 +75,17 @@ Feature: E.122.700 - The system shall support the ability to setup CRF versionin
     When I click on the link labeled "My Projects"
     And I click on the link labeled "E.122.700"
     Then I should see "Project Home and Design"
-    When I click on the link labeled exactly "Manage"
+    When I click on the link labeled "Manage"
     Then I should see "External Modules - Project Module Manager"
     # E.122.900 - Only Super-admins can configure external Module
     And I should NOT see the button labeled "Disable"
     And I click on the button labeled "Configure"
-    Then I should see "Configure Module" in the dialog box
-    And I should NOT see "Hide this module from non-admins in the list of enabled modules on this project" in the dialog box
-    And I should NOT see "Provide the suffix used to identify the version field on a form" in the dialog box
-    And I should NOT see "The current crf version" in the dialog box
-    And I should NOT see "If checked, any fields identified as versioning fields will be automatically set as readonly" in the dialog box
-    Then I click on the button labeled "Cancel" in the dialog box
+    Then I should see "Configure Module"
+    And I should NOT see "Hide this module from non-admins in the list of enabled modules on this project"
+    And I should NOT see "Provide the suffix used to identify the version field on a form"
+    And I should NOT see "The current crf version"
+    And I should NOT see "If checked, any fields identified as versioning fields will be automatically set as readonly"
+    Then I click on the button labeled "Cancel"
 
     #VERIFY - Versioning page
     When I click on the link labeled "Versioning"
@@ -115,11 +115,11 @@ Feature: E.122.700 - The system shall support the ability to setup CRF versionin
     And I click on the link labeled "E.122.700"
     
     #E.122.800 - Configure Versioning field as readonly
-    Given I click on the link labeled exactly "Manage"
+    Given I click on the link labeled "Manage"
     Then I should see "External Modules - Project Module Manager"
     And I click on the button labeled "Configure"
     And I check the checkbox labeled "If checked, any fields identified as versioning fields will be automatically set as readonly"
-    And I click on the button labeled "Save" in the dialog box
+    And I click on the button labeled "Save"
     Then I should see "Versioning - v1.0.0"
 
     # Version number should be an integer
@@ -169,12 +169,12 @@ Feature: E.122.700 - The system shall support the ability to setup CRF versionin
     And I click on the button labeled "Cancel"
 
     # Updating the version number in the configuration settings
-    Given I click on the link labeled exactly "Manage"
+    Given I click on the link labeled "Manage"
     Then I should see "External Modules - Project Module Manager"
     And I click on the button labeled "Configure"
     Then I should see "3"
     When I clear field and enter "5" into the input field labeled "The current crf version"
-    And I click on the button labeled "Save" in the dialog box
+    And I click on the button labeled "Save"
     Then I should see "Versioning - v1.0.0"
 
   Scenario: E.122.1000, E.122.1100 - Versioning for Repeating Instruments in Arm 1
@@ -225,12 +225,12 @@ Feature: E.122.700 - The system shall support the ability to setup CRF versionin
 
   Scenario: E.122.100 - Disable external module
     # Disable external module in project
-    Given I click on the link labeled exactly "Manage"
+    Given I click on the link labeled "Manage"
     Then I should see "External Modules - Project Module Manager"
     And I should see "Versioning - v1.0.0"
-    When I click on the button labeled exactly "Disable"
-    Then I should see "Disable module?" in the dialog box
-    When I click on the button labeled "Disable module" in the dialog box
+    When I click on the button labeled "Disable"
+    Then I should see "Disable module?"
+    When I click on the button labeled "Disable module"
     Then I should NOT see "Versioning - v1.0.0"
 
     Given I click on the link labeled "Logging"
@@ -244,10 +244,10 @@ Feature: E.122.700 - The system shall support the ability to setup CRF versionin
 
     # Disable external module in Control Center
     Given I click on the link labeled "Control Center"
-    When I click on the link labeled exactly "Manage"
-    And I click on the button labeled exactly "Disable"
-    Then I should see "Disable module?" in the dialog box
-    When I click on the button labeled "Disable module" in the dialog box
+    When I click on the link labeled "Manage"
+    And I click on the button labeled "Disable"
+    Then I should see "Disable module?"
+    When I click on the button labeled "Disable module"
     Then I should NOT see "Versioning - v1.0.0"
 
     # Not checking 'Delete Version' for now as this is used for deleting lower versions.

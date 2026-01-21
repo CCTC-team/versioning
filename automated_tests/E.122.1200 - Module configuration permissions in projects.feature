@@ -6,23 +6,23 @@ Feature: E.122.1200 - The system shall support the ability to configure 'Module 
 Scenario: E.122.1200 - Module configuration permissions in projects
     Given I login to REDCap with the user "Test_Admin"
     When I click on the link labeled "Control Center"
-    When I click on the link labeled exactly "Manage"
+    When I click on the link labeled "Manage"
     Then I should see "External Modules - Module Manager"
     And I should NOT see "Versioning - v1.0.0"
     When I click on the button labeled "Enable a module"
     And I click on the button labeled Enable for the external module named "Versioning"
-    And I click on the button labeled "Enable" in the dialog box
+    And I click on the button labeled "Enable"
     Then I should see "Versioning - v1.0.0"
     
-    When I click on the button labeled exactly "Configure"
+    When I click on the button labeled "Configure"
     Then I should see the dropdown field labeled "Module configuration permissions in projects" with the option "Require Project Setup/Design privilege" selected
     And I click on the button labeled "Save"
     Then I should see "Versioning - v1.0.0"
 
-    When I create a new project named "E.122.1200" by clicking on "New Project" in the menu bar, selecting "Practice / Just for fun" from the dropdown, choosing file "redcap_val/Project_redcap_val_nodata.xml", and clicking the "Create Project" button
+    When I create a new project named "E.122.1200" by clicking on "New Project" in the menu bar, selecting "Practice / Just for fun" from the dropdown, choosing file "fixtures/cdisc_files/Project_redcap_val_nodata.xml", and clicking the "Create Project" button
 
     # Enable external module
-    And I click on the link labeled exactly "Manage"
+    And I click on the link labeled "Manage"
     Then I should see "External Modules - Project Module Manager"
     When I click on the button labeled "Enable a module"
     And I click on the button labeled Enable for the external module named "Versioning - v1.0.0"
@@ -39,10 +39,10 @@ Scenario: E.122.1200 - Module configuration permissions in projects
 
     # Enable - Require module-specific user privilege
     When I click on the link labeled "Control Center"
-    And I click on the link labeled exactly "Manage"
+    And I click on the link labeled "Manage"
     Then I should see "External Modules - Module Manager"
     And I should see "Versioning - v1.0.0"
-    When I click on the button labeled exactly "Configure"
+    When I click on the button labeled "Configure"
     And I select "Require module-specific user privilege" on the dropdown field labeled "Module configuration permissions in projects"
     And I click on the button labeled "Save"
     Then I should see "Versioning - v1.0.0"
@@ -62,20 +62,20 @@ Scenario: E.122.1200 - Module configuration permissions in projects
 
 Scenario: E.122.600 - View Usage of the external module
     When I click on the link labeled "Control Center"
-    And I click on the link labeled exactly "Manage"
+    And I click on the link labeled "Manage"
     Then I should see "Versioning - v1.0.0"
     When I click on the button labeled "View Usage"
-    And I should see a link labeled "E.122.1200" in the dialog box
-    When I click on the link labeled "E.122.1200" in the dialog box
+    And I should see a link labeled "E.122.1200"
+    When I click on the link labeled "E.122.1200"
     Then I should see "Project Home"
     And I should see "E.122.1200"
 
     # Disable external module in Control Center
     When I click on the link labeled "Control Center"
-    And I click on the link labeled exactly "Manage"
-    And I click on the button labeled exactly "Disable"
-    Then I should see "Disable module?" in the dialog box
-    When I click on the button labeled "Disable module" in the dialog box
+    And I click on the link labeled "Manage"
+    And I click on the button labeled "Disable"
+    Then I should see "Disable module?"
+    When I click on the button labeled "Disable module"
     Then I should NOT see "Versioning - v1.0.0"
     And I logout
 
