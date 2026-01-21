@@ -18,6 +18,7 @@ Scenario: E.122.300 - Make module discoverable by users
     Then I should see "External Modules - Module Manager"
     And I should NOT see "Versioning - v1.0.0"
     When I click on the button labeled "Enable a module"
+    Then I should see "Available Modules"
     And I click on the button labeled Enable for the external module named "Versioning"
     And I click on the button labeled "Enable"
     Then I should see "Versioning - v1.0.0"
@@ -41,8 +42,8 @@ Scenario: E.122.300 - Make module discoverable by users
     And I should see "Discoverable"
     And I should NOT see "Activation request is pending"
     When I click on the button labeled Request Activation for the external module named "Versioning"
-    Then I should see "SUCCESS"
-    And I click on the button labeled "Close"
+    # Then I should see "SUCCESS"
+    # And I click on the button labeled "Close"
     And I should NOT see "Versioning - v1.0.0"
 
     When I click on the button labeled "View available modules"

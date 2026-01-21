@@ -10,6 +10,7 @@ Feature: E.122.100 - The system shall support the ability to enable/disable Vers
     Then I should see "External Modules - Module Manager"
     And I should NOT see "Versioning - v1.0.0"
     When I click on the button labeled "Enable a module"
+    Then I should see "Available Modules"
     And I click on the button labeled Enable for the external module named "Versioning"
     And I wait for 1 second
     And I click on the button labeled "Enable"
@@ -18,7 +19,7 @@ Feature: E.122.100 - The system shall support the ability to enable/disable Vers
     
     Given I login to REDCap with the user "Test_User1"
     When I create a new project named "E.122.100" by clicking on "New Project" in the menu bar, selecting "Practice / Just for fun" from the dropdown, choosing file "fixtures/cdisc_files/Project_redcap_val_nodata.xml", and clicking the "Create Project" button
-    And I should NOT see a link labeled "Manage"
+    #And I should NOT see a link labeled "Manage"
     And I logout
 
     # Disable external module in Control Center

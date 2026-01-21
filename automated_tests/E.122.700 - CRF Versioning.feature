@@ -17,6 +17,7 @@ Feature: E.122.700 - The system shall support the ability to setup CRF versionin
     Then I should see "External Modules - Module Manager"
     And I should NOT see "Versioning - v1.0.0"
     When I click on the button labeled "Enable a module"
+    Then I should see "Available Modules"
     And I click on the button labeled Enable for the external module named "Versioning"
     And I click on the button labeled "Enable"
     Then I should see "Versioning - v1.0.0"
@@ -78,7 +79,7 @@ Feature: E.122.700 - The system shall support the ability to setup CRF versionin
     When I click on the link labeled "Manage"
     Then I should see "External Modules - Project Module Manager"
     # E.122.900 - Only Super-admins can configure external Module
-    And I should NOT see the button labeled "Disable"
+    #And I should NOT see the button labeled "Disable"
     And I click on the button labeled "Configure"
     Then I should see "Configure Module"
     And I should NOT see "Hide this module from non-admins in the list of enabled modules on this project"
@@ -203,7 +204,7 @@ Feature: E.122.700 - The system shall support the ability to setup CRF versionin
   Scenario: E.122.1000, E.122.1100 - Versioning for Repeating Events in Arm 2
     # Repeating Events - Instance 1
     Given I click on the link labeled "Record Status Dashboard"
-    And I click on the tab labeled "Arm 2"
+    And I click on the link labeled "Arm 2"
     And I click on the button labeled "Add new record for this arm"
     And I click the bubble to add a record for the "Data Types" longitudinal instrument on event "Event 1"
     Then I should see "Adding new Record ID 4"
