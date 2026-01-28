@@ -43,7 +43,7 @@ Scenario: E.122.300 - Make module discoverable by users
     Then I should see "Versioning - v1.0.0"
     And I should see "Discoverable"
     And I should NOT see "Activation request is pending"
-    When I click on the button labeled Request Activation for the external module named "Versioning"
+    When I click on the button labeled "Request Activation" in the row labeled "Versioning"
     # Then I should see "SUCCESS"
     # And I click on the button labeled "Close"
     And I should NOT see "Versioning - v1.0.0"
