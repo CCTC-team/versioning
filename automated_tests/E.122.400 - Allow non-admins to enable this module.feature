@@ -10,8 +10,10 @@ Scenario: E.122.400 - Allow non-admins to enable this module on projects
     Then I should see "External Modules - Module Manager"
     And I should NOT see "Versioning - v1.0.0"
     When I click on the button labeled "Enable a module"
+    And I wait for 2 seconds
     Then I should see "Available Modules"
-    And I click on the button labeled Enable for the external module named "Versioning"
+    And I click on the button labeled "Enable" in the row labeled "Versioning"
+    And I wait for 1 second
     And I click on the button labeled "Enable"
     Then I should see "Versioning - v1.0.0"
     
@@ -30,7 +32,7 @@ Scenario: E.122.400 - Allow non-admins to enable this module on projects
 
     When I click on the button labeled "View available modules"
     Then I should see "Versioning - v1.0.0"
-    And I click on the button labeled Enable for the external module named "Versioning - v1.0.0"
+    And I click on the button labeled "Enable" in the row labeled "Versioning - v1.0.0"
     Then I should see "Versioning - v1.0.0"
     And I logout
 
