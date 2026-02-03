@@ -21,8 +21,6 @@
       }
     ]
   },
-  "system-settings": [
-  ],
   "project-settings": [
     {
       "key": "versioning-field-suffix",
@@ -38,7 +36,12 @@
       "type": "text",
       "repeatable": false,
       "required": true,
-      "super-users-only": true
+      "super-users-only": true,
+      "branchingLogic": {
+        "field": "versioning-field-suffix",
+        "op": "!=",
+        "value": ""
+      }
     },
     {
       "key": "version-field-auto-set-as-readonly",
@@ -46,7 +49,12 @@
       "type": "checkbox",
       "repeatable": false,
       "required": false,
-      "super-users-only": true
+      "super-users-only": true,
+      "branchingLogic": {
+        "field": "versioning-field-suffix",
+        "op": "!=",
+        "value": ""
+      }
     }
   ],
   "compatibility": {

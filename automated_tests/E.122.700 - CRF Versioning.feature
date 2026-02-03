@@ -129,7 +129,7 @@ Feature: E.122.700 - The system shall support the ability to setup CRF versionin
     Given I click on the link labeled "Versioning"
     When I enter "2.5" into the input field labeled "Update the version to"
     And I click on the button labeled "Submit"
-    Then I should see "Expecting an integer between 2 and 999 but got -> 2.5"
+    Then I should see "Invalid version number. Must be an integer between 1 and 999. Got: 2.5"
     
     # Updating the version from Versioning page
     When I enter "3" into the input field labeled "Update the version to"
@@ -140,7 +140,7 @@ Feature: E.122.700 - The system shall support the ability to setup CRF versionin
     # Cannot downgrade version from Versioning page
     When I enter "2" into the input field labeled "Update the version to"
     And I click on the button labeled "Submit"
-    Then I should see "Expecting the new version [2] to be at least one greater than current version [3]"
+    Then I should see "New version must be greater than current version (3)"
 
     #VERIFY - Versioning field is readonly
     Given I click on the link labeled "Add / Edit Records"
@@ -265,6 +265,25 @@ Feature: E.122.700 - The system shall support the ability to setup CRF versionin
       | mm/dd/yyyy hh:mm | test_admin | Enable external module "versioning_v1.0.0" for project                   |
       | mm/dd/yyyy hh:mm | test_admin | Enable external module "versioning_v1.0.0" for system                    |
     
+    When I click on the link labeled "View Logs"
+    Then I should see "External Module Logs"
+    And I should see a table header and row containing the following values in a table:
+      | Date/Time           | Module     | Project | Message                           | UserName   |
+      | yyyy-mm-dd hh:mm:ss | versioning |         | Piping code inserted successfully | Test_Admin |
+      | yyyy-mm-dd hh:mm:ss | versioning |         | Module system enable initiated    | Test_Admin |
+      | yyyy-mm-dd hh:mm:ss | versioning | 13      | Version updated                   | Test_Admin |
+      | yyyy-mm-dd hh:mm:ss | versioning |         | Piping code removed successfully  | Test_Admin |
+      | yyyy-mm-dd hh:mm:ss | versioning |         | Module system disable initiated   | Test_Admin |
+
+    When I click on the third button labeled "Show Parameters"
+    Then I should see "Log Entry Parameters"
+    And I should see a table header and row containing the following values in a table:
+      | Name        | Value               |
+      | old_version | 1                   |
+      | updated_at  | yyyy-mm-dd hh:mm:ss |
+      | new_version | 3                   |
+      | updated_by  | test_admin          |
+
     And I logout
 
     # Verify no exceptions are thrown in the system
