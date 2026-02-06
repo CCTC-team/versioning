@@ -3,6 +3,7 @@
   "description": "Module that supports versioning a project to help manage amendments",
   "namespace": "CCTC\\VersioningModule",
   "framework-version": 14,
+  "documentation": "https://github.com/CCTC-team/versioning",
   "authors": [
     {
       "name": "Richard Hardy",

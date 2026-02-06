@@ -92,3 +92,16 @@ version, but will not be stored in the database until the form has been saved.
 
 To-Do
 Add a 3rd parameter to external module project setting for repeating fields
+
+#### Automation Testing
+
+The module includes comprehensive **Cypress automated** tests using the **Cucumber/Gherkin framework**. To set up Cypress, refer to the following repository:  
+https://github.com/vanderbilt-redcap/redcap_cypress
+
+We use a custom Docker instance, **CCTC_REDCap_Docker**, instead of `redcap_docker`. This instance mirrors our Live environment by using the same versions of **MariaDB** and **PHP**.
+
+All automated test scripts are located in the `automated_tests` directory. These scripts can also be used by users to manually test the external module. The directory contains:
+- Custom step definitions created by our team
+- Fixture files
+- User Requirement Specification (URS) documents
+- Feature test scripts
