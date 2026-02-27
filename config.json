@@ -2,7 +2,7 @@
   "name": "Versioning",
   "description": "Module that supports versioning a project to help manage amendments",
   "namespace": "CCTC\\VersioningModule",
-  "framework-version": 14,
+  "framework-version": 16,
   "documentation": "https://github.com/CCTC-team/versioning",
   "authors": [
     {
