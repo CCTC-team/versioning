@@ -8,14 +8,22 @@ Feature: E.122.100 - The system shall support the ability to enable/disable Vers
     When I click on the link labeled "Control Center"
     And I click on the link labeled "Manage"
     Then I should see "External Modules - Module Manager"
-    And I should NOT see "Versioning - v1.0.0"
+    And I should NOT see "Versioning - v1.0.1"
     When I click on the button labeled "Enable a module"
     And I wait for 2 seconds
     Then I should see "Available Modules"
     And I click on the button labeled "Enable" in the row labeled "Versioning"
     And I wait for 1 second
     And I click on the button labeled "Enable"
-    Then I should see "Versioning - v1.0.0"
+    Then I should see "Versioning - v1.0.1"
+
+    When I click on the link labeled "View Logs"
+    Then I should see "External Module Logs"
+    And I should see a table header and row containing the following values in a table:
+      | Module     | Message                           | UserName   |
+      | versioning | Piping code inserted successfully | Test_Admin |
+      | versioning | Module system enable initiated    | Test_Admin |
+
     And I logout
     
     Given I login to REDCap with the user "Test_User1"
@@ -30,7 +38,17 @@ Feature: E.122.100 - The system shall support the ability to enable/disable Vers
     And I click on the button labeled "Disable"
     Then I should see "Disable module?"
     When I click on the button labeled "Disable module"
-    Then I should NOT see "Versioning - v1.0.0"
+    Then I should NOT see "Versioning - v1.0.1"
+
+    When I click on the link labeled "View Logs"
+    Then I should see "External Module Logs"
+    And I should see a table header and row containing the following values in a table:
+      | Module     | Message                           | UserName   |
+      | versioning | Piping code removed successfully  | Test_Admin |
+      | versioning | Module system disable initiated   | Test_Admin |
+      | versioning | Piping code inserted successfully | Test_Admin |
+      | versioning | Module system enable initiated    | Test_Admin |
+
     And I logout
 
     # Verify no exceptions are thrown in the system

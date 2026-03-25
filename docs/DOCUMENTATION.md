@@ -21,7 +21,7 @@ The Versioning module is a REDCap External Module that enables project designers
 ## File Structure
 
 ```
-versioning_v1.0.0/
+versioning_v1.0.1/
 ├── VersioningModule.php    # Main module class
 ├── config.json             # Module configuration
 ├── index.php               # Project link page for viewing/updating version
@@ -54,7 +54,7 @@ versioning_v1.0.0/
 The following directory structure is planned for future versions to better separate concerns:
 
 ```
-versioning_v1.0.0/
+versioning_v1.0.1/
 ├── classes/
 │   ├── VersionManager.php       # Version CRUD operations
 │   ├── FieldIdentifier.php      # Field suffix matching logic
