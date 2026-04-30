@@ -66,12 +66,33 @@ jobs:
 
       - name: Get REDCap Source
         env:
-          GH_PAT: ${{ secrets.CCTC_TEAM_PAT }}
+          # Prefer a dedicated PAT for redcap_source if provided; fall back to CCTC_TEAM_PAT.
+          GH_PAT: ${{ secrets.REDCAP_SOURCE_PAT || secrets.CCTC_TEAM_PAT }}
         run: |
+          if [ -z "$GH_PAT" ]; then
+            echo "::error::No PAT available for cloning CCTC-team/redcap_source."
+            echo "Set repo secret CCTC_TEAM_PAT (or REDCAP_SOURCE_PAT) on this repository."
+            exit 1
+          fi
+
           if [[ "${{ env.REDCAP_VERSION }}" = "99.99.99" ]]; then
             export BRANCH=main
           else
             export BRANCH=${{ env.REDCAP_VERSION }}
+          fi
+
+          # Verify the PAT can actually see redcap_source before attempting the clone,
+          # so a permission problem produces an explicit error instead of git's generic
+          # "Invalid username or token" message.
+          HTTP_CODE=$(curl -s -o /dev/null -w '%{http_code}' \
+            -H "Authorization: Bearer ${GH_PAT}" \
+            -H "Accept: application/vnd.github+json" \
+            https://api.github.com/repos/CCTC-team/redcap_source)
+          if [ "$HTTP_CODE" != "200" ]; then
+            echo "::error::PAT cannot access CCTC-team/redcap_source (HTTP $HTTP_CODE)."
+            echo "Grant the PAT 'Contents: Read' access to CCTC-team/redcap_source,"
+            echo "or set a separate REDCAP_SOURCE_PAT secret on this repo."
+            exit 1
           fi
 
           cd CCTC_REDCap_Docker/redcap_source
@@ -95,6 +116,9 @@ jobs:
           rm -rf "$TARGET/.git" "$TARGET/.github"
           echo "=== EM injected at $TARGET ==="
           ls -la "$TARGET"
+
+      - name: Symlink redcap_source to workspace root for Cypress
+        run: ln -s CCTC_REDCap_Docker/redcap_source redcap_source
 
       - name: Build and start Docker services
         run: |
@@ -161,12 +185,10 @@ jobs:
         id: specs
         working-directory: redcap_cypress
         run: |
-          # Only run feature specs that belong to the Versioning EM (E.122.*),
-          # excluding files explicitly marked REDUNDANT.
-          find . -type f -name 'E.122.*.feature' ! -iname '*REDUNDANT*' \
-            | sed 's|^\./||' \
+          find ../redcap_source/modules/${{ env.EM_NAME }}_${{ env.EM_VERSION }}/automated_tests \
+               -type f -name 'E.122.*.feature' ! -iname '*REDUNDANT*' \
             | sort -u > shard-specs.txt
-          SPEC_COUNT=$(grep -c . shard-specs.txt || echo 0)
+          SPEC_COUNT=$(wc -l < shard-specs.txt | tr -d ' ')
           echo "spec_count=${SPEC_COUNT}" >> $GITHUB_OUTPUT
           echo "Will run ${SPEC_COUNT} versioning specs:"
           cat shard-specs.txt
