@@ -1,5 +1,7 @@
 ﻿### Versioning ###
 
+[![Versioning EM Cypress Tests](https://github.com/CCTC-team/versioning/actions/workflows/cypress-tests.yml/badge.svg)](https://github.com/CCTC-team/versioning/actions/workflows/cypress-tests.yml)
+
 As projects evolve over time with updates and amendments, it is often useful (or imperative) to adapt questions to
 account for different versions. For instance, validating a user entered value may need to change for later versions, 
 when, for example, in version 1 the maximum value is 20, whereas for version 2 the maximum value is 50.
