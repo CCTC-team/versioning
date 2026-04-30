@@ -231,15 +231,12 @@ jobs:
           export UID
           npm run test:retry-failed -- --spec-file shard-specs.txt
 
-      - name: Merge mochawesome JSON reports
+      - name: Generate combined HTML report
         if: always()
         working-directory: redcap_cypress
         run: |
-          mkdir -p results
           if ls cypress/results/json/*.json >/dev/null 2>&1; then
-            npx --yes mochawesome-merge cypress/results/json/*.json -o results/test-report.json
-            echo "Merged report:"
-            ls -la results/
+            npm run report
           else
             echo "::warning::No mochawesome JSON files were produced — Cypress likely failed before any spec ran."
           fi
@@ -251,7 +248,7 @@ jobs:
           name: versioning-cypress-results
           path: |
             redcap_cypress/cypress/results/json/*.json
-            redcap_cypress/results/test-report.json
+            redcap_cypress/cypress/results/html/test-report.html
           retention-days: 30
           if-no-files-found: warn
 
