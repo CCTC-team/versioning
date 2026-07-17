@@ -10,3 +10,4 @@ E.122.900 - The system shall allow only super-admins to configure the Versioning
 E.122.1000 - The system shall support the ability to use Versioning external module for different Arms.
 E.122.1100 - The system shall support the ability to use Versioning external module for Repeating Events/Instruments.
 E.122.1200 - The system shall support the ability to configure 'Module configuration permissions in projects' for Versioning external module.
+E.122.1300 - The system shall record every configuration change (who changed which setting, when, and from what value to what) for the Versioning external module to the module's View Logs page.
