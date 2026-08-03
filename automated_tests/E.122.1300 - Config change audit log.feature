@@ -9,22 +9,22 @@ Feature: E.122.1300 - The system shall record configuration changes for the Vers
     When I click on the link labeled "Control Center"
     And I click on the link labeled "Manage"
     Then I should see "External Modules - Module Manager"
-    And I should NOT see "Versioning - v1.1.0"
+    And I should NOT see "Versioning - v1.1.1"
     When I click on the button labeled "Enable a module"
     And I wait for 2 seconds
     Then I should see "Available Modules"
     And I click on the button labeled "Enable" in the row labeled "Versioning"
     And I wait for 1 second
     And I click on the button labeled "Enable"
-    Then I should see "Versioning - v1.1.0"
+    Then I should see "Versioning - v1.1.1"
 
   Scenario: First configuration save logs the initial values
     Given I create a new project named "E.122.1300" by clicking on "New Project" in the menu bar, selecting "Practice / Just for fun" from the dropdown, choosing file "fixtures/cdisc_files/Project_redcap_val_nodata.xml", and clicking the "Create Project" button
     And I click on the link labeled "Manage"
     Then I should see "External Modules - Project Module Manager"
     When I click on the button labeled "Enable a module"
-    And I click on the button labeled "Enable" in the row labeled "Versioning - v1.1.0"
-    Then I should see "Versioning - v1.1.0"
+    And I click on the button labeled "Enable" in the row labeled "Versioning - v1.1.1"
+    Then I should see "Versioning - v1.1.1"
 
     # First save has no prior snapshot, so each setting the admin sets is logged as
     # (empty) -> value. versioning-field-suffix and current-project-version are
@@ -36,7 +36,7 @@ Feature: E.122.1300 - The system shall record configuration changes for the Vers
     And I enter "1" into the input field labeled "The current crf version"
     And I check the checkbox labeled "If checked, any fields identified as versioning fields will be automatically set as readonly"
     Then I click on the button labeled "Save"
-    And I should see "Versioning - v1.1.0"
+    And I should see "Versioning - v1.1.1"
 
     #VERIFY - the audit trail on the module's own View Logs page
     When I click on the link labeled "View Logs"
@@ -76,7 +76,7 @@ Feature: E.122.1300 - The system shall record configuration changes for the Vers
     And I click on the link labeled "E.122.1300"
     And I click on the link labeled "Manage"
     Then I should see "External Modules - Project Module Manager"
-    And I should see "Versioning - v1.1.0"
+    And I should see "Versioning - v1.1.1"
 
     # Change the field suffix from "crfver" to "crfversion". The other required
     # fields keep their values, so only this key changes: a genuine value -> value
@@ -85,7 +85,7 @@ Feature: E.122.1300 - The system shall record configuration changes for the Vers
     Then I should see "Configure Module"
     And I clear field and enter "crfversion" into the input field labeled "Provide the suffix"
     Then I click on the button labeled "Save"
-    And I should see "Versioning - v1.1.0"
+    And I should see "Versioning - v1.1.1"
 
     #VERIFY - the audit trail on the module's own View Logs page
     When I click on the link labeled "View Logs"
@@ -113,7 +113,7 @@ Feature: E.122.1300 - The system shall record configuration changes for the Vers
     And I click on the button labeled "Disable"
     Then I should see "Disable module?"
     When I click on the button labeled "Disable module"
-    Then I should NOT see "Versioning - v1.1.0"
+    Then I should NOT see "Versioning - v1.1.1"
 
     # Verify no exceptions are thrown in the system
     Given I open Email
