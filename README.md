@@ -70,6 +70,15 @@ Settings
 - `version-field-auto-set-as-readonly` - when checked, this setting will automatically make the versioning fields 
   readonly as if they were given @READONLY action tag. This just simplifies set up of the fields for each form
 
+##### Configuration audit log
+
+Every change to the module's configuration is recorded to the module's **View Logs** page (Control Center →
+External Modules → View Logs). One entry is written per changed setting, recording the setting name, its old and
+new values, the user who made the change and when. The first save on a freshly configured module logs the values
+that were actually set (as `(empty) -> value`); settings left blank are not logged. Old and new values are held as
+log parameters, which REDCap shows to super-users via the **Show Parameters** button. Note this is separate from the
+Versioning index page's own version-change log, which records project version changes rather than module settings.
+
 #### Usage
 
 Add "@DEFAULT = '[em-project-setting-value:versioning:current-project-version]'" to the version field
@@ -130,7 +139,7 @@ The module ships with a CI workflow at [.github/workflows/cypress-tests.yml](.gi
 
 **Follow-on jobs**
 - `prune-artifacts` — deletes artifacts from older runs, keeping only the latest 2.
-- `publish-report` — merges the run's mochawesome JSON into one combined HTML report and publishes it to GitHub Pages (report named `versioning_v1.1.1.html`, also served at the Pages root as `index.html`).
+- `publish-report` — merges the run's mochawesome JSON into one combined HTML report and publishes it to GitHub Pages **per module version**: the report for this run lands at `/<EM_VERSION>/index.html` (e.g. `/v1.1.1/`) and the Pages root serves an index linking every published version, newest first. Previously published versions are preserved by restoring the cumulative site from the `pages-store` branch before the new version is added and the snapshot force-pushed back.
 
 **Required repository secrets**
 - `CCTC_TEAM_PAT` — PAT with `read:packages` for the private `redcap-aio` / `cypress-runner-aio` GHCR images.

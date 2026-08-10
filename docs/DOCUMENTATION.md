@@ -113,6 +113,18 @@ Version changes are recorded in the module's audit log with the user ID and time
 
 **Branching Logic:** The `current-project-version` and `version-field-auto-set-as-readonly` settings are only visible when `versioning-field-suffix` is non-empty.
 
+### Configuration audit log
+
+`redcap_module_save_configuration($project_id)` records every configuration change to the module's **View Logs**
+page. On save it diffs the submitted settings against the values held beforehand and writes one
+`Configuration changed (project)` entry per changed key, carrying the setting name and its old and new values as
+log parameters — REDCap shows these to super-users via the **Show Parameters** button. The first save diffs against
+an empty baseline, so initial values are logged as `(empty) -> value`; settings left blank are not logged. This
+module has no system-level settings, so the hook's system-scope branch never logs.
+
+This is distinct from `logVersionChange()` below, which records changes to a project's *version value* rather than
+to the module's settings.
+
 ## Class Methods
 
 ### VersioningModule.php
