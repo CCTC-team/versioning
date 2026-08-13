@@ -20,12 +20,11 @@ Feature: E.122.100 - The system shall support the ability to enable/disable Vers
     When I click on the link labeled "View Logs"
     Then I should see "External Module Logs"
     And I should see a table header and row containing the following values in a table:
-      | Module     | Message                           | UserName   |
-      | versioning | Piping code inserted successfully | Test_Admin |
-      | versioning | Module system enable initiated    | Test_Admin |
+      | Module     | Message                        | UserName   |
+      | versioning | Module system enable initiated | Test_Admin |
 
     And I logout
-    
+
     Given I login to REDCap with the user "Test_User1"
     When I create a new project named "E.122.100" by clicking on "New Project" in the menu bar, selecting "Practice / Just for fun" from the dropdown, choosing file "fixtures/cdisc_files/Project_redcap_val_nodata.xml", and clicking the "Create Project" button
     #And I should NOT see a link labeled "Manage"
@@ -43,11 +42,9 @@ Feature: E.122.100 - The system shall support the ability to enable/disable Vers
     When I click on the link labeled "View Logs"
     Then I should see "External Module Logs"
     And I should see a table header and row containing the following values in a table:
-      | Module     | Message                           | UserName   |
-      | versioning | Piping code removed successfully  | Test_Admin |
-      | versioning | Module system disable initiated   | Test_Admin |
-      | versioning | Piping code inserted successfully | Test_Admin |
-      | versioning | Module system enable initiated    | Test_Admin |
+      | Module     | Message                         | UserName   |
+      | versioning | Module system disable initiated | Test_Admin |
+      | versioning | Module system enable initiated  | Test_Admin |
 
     And I logout
 

@@ -27,6 +27,12 @@
       }
     ]
   },
+  "action-tags": [
+    {
+      "tag": "@VERSION",
+      "description": "Sets this field to the project's current version, as configured in the Versioning module. The value is applied only while the instrument has never been saved, so a form permanently retains the version it was first completed under."
+    }
+  ],
   "project-settings": [
     {
       "key": "versioning-field-suffix",

@@ -74,24 +74,43 @@ versioning_v1.1.1/
 
 ## Core Functionality
 
-### 1. Custom Piping Parameter
+### 1. The `@VERSION` Action Tag
 
-The module extends REDCap's piping functionality by injecting a custom case handler into `Piping.php`. This enables the use of:
+The module declares the `@VERSION` action tag in `config.json`, which registers it in the Online Designer's
+**@ Action Tags** popup. Registration is descriptive only — per the framework's `ExternalModules::getActionTags()`,
+`config.json` supplies the tag name and description for display, and the module itself implements the behaviour in
+its render hooks.
 
 ```
-[em-project-setting-value:versioning:current-project-version]
+@VERSION
 ```
 
-This piping parameter can be used in `@DEFAULT` action tags to automatically populate version fields when new forms are created.
-
-> **Known Issue (P0 - Critical):** The piping injection modifies a core REDCap file (`Classes/Piping.php`), which will be overwritten on REDCap upgrades.
+> **Resolved (was P0 - Critical):** Earlier versions injected a `case "em-project-setting-value"` handler into the
+> core file `Classes/Piping.php`, which was lost on every REDCap upgrade and required the file to be writable. The
+> module no longer modifies any REDCap source file.
 
 ### 2. Automatic Version Field Population
 
-When a form contains exactly one field ending with the configured suffix (e.g., `_crfver`), the module:
-- Detects the version field on form load
+A field is treated as a version field if it carries `@VERSION`, or — when no field on the instrument is tagged — if
+it is the only field whose name ends with the configured suffix (e.g., `_crfver`). On form load the module:
+- Writes the current project version into the field, but only while the instrument instance has never been saved
 - Hides the "Mark as Missing" icon for the version field
-- Optionally sets the field as readonly
+- Optionally sets the field as readonly (data entry forms only)
+
+The write mirrors core's `@DEFAULT` condition in `Classes/DataEntry.php`, which applies a default only when the
+field is empty **and** the form has no saved data. A form therefore permanently retains the version it was first
+completed under. The value is assigned directly in JavaScript without dispatching change events, so REDCap's
+`dataEntryFormValuesChanged` flag stays `false` and a form that is merely opened does not raise a save prompt.
+
+> **Do not remove the `retriggerLogic()` call.** Because the version is written after REDCap has initialised, and
+> without firing change events, REDCap's branching logic and calculations would otherwise still evaluate against an
+> empty field. In JavaScript an empty value coerces to `0`, which silently flips comparisons — branching logic such
+> as `[version] > 2` evaluates false on a form whose version is 3, hiding a field that should be shown, with no
+> error anywhere. The module therefore calls REDCap's own `calculate()` and `doBranching()` for each version field
+> once the page is ready, which is exactly what core does after it changes a value programmatically (see the
+> reset-value link in `Classes/DataEntry.php`). `setDataEntryFormValuesChanged()` is deliberately *not* called, so
+> the form is still not marked as edited. This is covered by the branching assertions in
+> `E.122.700 - CRF Versioning.feature`.
 
 ### 3. Version Management Interface
 
@@ -133,17 +152,17 @@ to the module's settings.
 
 | Constant | Description |
 |----------|-------------|
-| `PipingFilePath` | Path to `APP_PATH_DOCROOT/Classes/Piping.php` |
-| `PipingCode` | SQL case handler code injected into Piping.php |
-| `PipingSearchTerm` | Search pattern used to locate the injection point |
+| `VersionActionTag` | The action tag (`@VERSION`) marking a field as a version field |
+| `StalePipePrefix` | `[em-project-setting-value:` — an unresolved legacy pipe, treated as an empty value |
 
 #### Hook Methods
 
 | Method | Description |
 |--------|-------------|
-| `redcap_module_system_enable($version)` | Injects piping code into Piping.php on system enable. Logs the event. |
-| `redcap_module_system_disable($version)` | Removes piping code from Piping.php on system disable. Logs the event. |
-| `redcap_data_entry_form($project_id, $record, $instrument, $event_id, $group_id, $repeat_instance)` | Handles version field display: hides mark-as-missing icon, optionally applies readonly. Returns early if project ID is empty or required settings are not configured. |
+| `redcap_module_system_enable($version)` | Logs the event. No REDCap source files are modified. |
+| `redcap_module_system_disable($version)` | Logs the event. |
+| `redcap_data_entry_form($project_id, $record, $instrument, $event_id, $group_id, $repeat_instance)` | Applies versioning to the form, with the readonly setting permitted. |
+| `redcap_survey_page($project_id, $record, $instrument, $event_id, $group_id, $survey_hash, $response_id, $repeat_instance)` | Applies versioning to a survey page. The readonly setting has never applied on surveys and remains off. |
 | `redcap_module_link_check_display($project_id, $link)` | Returns the project link for all users. |
 | `validateSettings($settings)` | Validates that `current-project-version` is numeric and `versioning-field-suffix` is non-empty. |
 
@@ -151,60 +170,46 @@ to the module's settings.
 
 | Method | Returns | Description |
 |--------|---------|-------------|
-| `addCodeToFile($filePath, $searchTerm, $insertCode)` | `bool` | Injects code into a target file. Includes comprehensive error handling: validates file existence, readability, writability; checks for duplicate injection; logs success/failure. Throws `Exception` on error. |
-| `removeCodeFromFile($filePath, $removeCode)` | `bool` | Removes injected code from a target file. Includes error handling similar to `addCodeToFile()`. Returns `true` if code was not found (idempotent). |
-| `HideMarkAsMissingIcon($crfVerField)` | `void` | Outputs JavaScript to hide the mark-as-missing icon for the version field. Escapes the field name with `htmlspecialchars()`. |
+| `versionFields($project_id, $instrument)` | `array` | Returns the instrument's version fields: those annotated `@VERSION`, else the single field matching the configured suffix. Reads annotations via `REDCap::getDataDictionary()` and matches tags with core's `ActionTags::containsActionTags()`. |
+| `isUnsavedForm($record, $instrument, $event_id, $repeat_instance)` | `bool` | True when the instrument instance has no saved data, via `Records::formHasData()`. Mirrors core's `@DEFAULT` condition. |
+| `applyVersioning($project_id, $record, $instrument, $event_id, $repeat_instance, $allowReadonly)` | `void` | Shared entry point for both render hooks. Returns early if the project ID is empty, required settings are unconfigured, or the instrument has no version field. |
+| `emitVersionScript($fields, $version, $setValue, $setReadonly)` | `void` | Emits the client-side script that sets the value, applies readonly, and hides the mark-as-missing icon. Configuration is passed as JSON encoded with `JSON_HEX_*` flags. |
 | `logVersionChange($oldVersion, $newVersion)` | `void` | Records a version change in the module's audit log with project ID, old/new version, user ID, and timestamp. |
 
 ## REDCap Hooks Used
 
 | Hook | Purpose |
 |------|---------|
-| `redcap_module_system_enable` | Inject custom piping code into Piping.php |
-| `redcap_module_system_disable` | Remove custom piping code from Piping.php |
-| `redcap_data_entry_form` | Handle version field display and readonly behavior |
+| `redcap_module_system_enable` | Audit log entry only |
+| `redcap_module_system_disable` | Audit log entry only |
+| `redcap_data_entry_form` | Populate the version field; handle readonly and mark-as-missing |
+| `redcap_survey_page` | Populate the version field on survey pages |
 | `redcap_module_link_check_display` | Enable project navigation link |
 
-## Piping Code Injection
+## Legacy Piping Injection (removed)
 
-### Location
-The module injects code into:
-```
-APP_PATH_DOCROOT/Classes/Piping.php
-```
+Versions up to and including v1.1.1 wrote a `case "em-project-setting-value"` block into
+`APP_PATH_DOCROOT/Classes/Piping.php` on system enable and removed it on system disable, exposing
+`[em-project-setting-value:versioning:current-project-version]` for use in `@DEFAULT`. The constants
+`PipingFilePath`, `PipingCode` and `PipingSearchTerm` and the methods `addCodeToFile()` and `removeCodeFromFile()`
+supported this and have all been removed.
 
-### Injected Code
-The injection adds a new switch case `em-project-setting-value` that:
-1. Accepts module name and setting key as parameters
-2. Queries the external module settings table using parameterized queries
-3. Returns the setting value for piping
+### Migration
 
-### SQL Query (Parameterized)
-```sql
-SELECT b.value AS settingValue
-FROM redcap_external_modules a
-JOIN redcap_external_module_settings b
-    ON a.external_module_id = b.external_module_id
-WHERE a.directory_prefix = ?
-    AND b.project_id = ?
-    AND b.`key` = ?
-```
-
-### Error Handling for File Operations
-
-Both `addCodeToFile()` and `removeCodeFromFile()` include:
-- File existence validation
-- Readability/writability checks
-- Duplicate injection detection (idempotent operations)
-- Structured logging on success and failure
-- Exception propagation for callers to handle
+- **Deployment order matters.** Disable the module at system level *while still running v1.1.1* so its
+  `redcap_module_system_disable` hook removes the insert. Deploying this version first orphans the block in
+  `Piping.php`, where it must then be removed by hand.
+- **Project annotations.** Replace `@DEFAULT = '[em-project-setting-value:...]'` with `@VERSION` (or remove it and
+  rely on the suffix). Without the receiver REDCap stamps the tag into the field verbatim; the module treats a value
+  beginning with `StalePipePrefix` as empty and overwrites it, but only on forms that have not yet been saved. A
+  form already saved holding that literal must be corrected as data.
 
 ## Security Features
 
 1. **Input Sanitization**: Version numbers validated via `filter_input()` with `FILTER_VALIDATE_INT` and min/max range (1-999)
 2. **Output Escaping**: All HTML output uses `htmlspecialchars()` with `ENT_QUOTES` and `UTF-8` encoding in both `index.php` and `VersioningModule.php`
-3. **Parameterized Queries**: SQL injection prevention in piping code via `db_query()` with parameter binding
-4. **File Operation Checks**: Validates file existence, readability, and writability before modifications; logs all file operations
+3. **No Core File Modification**: The module writes to no REDCap source file, so it needs no write access outside its own directory
+4. **Encoded Script Payload**: Values passed to the client are JSON encoded with `JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT` so field names and settings cannot break out of the `<script>` block
 5. **Superuser Restrictions**: All configuration settings are limited to superusers only (`super-users-only: true` in config.json); version update form only displayed to superusers
 6. **Audit Logging**: Version changes are logged with project ID, user ID, old/new version, and timestamp via `logVersionChange()`
 
@@ -239,9 +244,10 @@ The version update page (`index.php`) provides a superuser-only interface for ma
 
 ### Instrument Design
 
-1. Create a text field in each instrument with the configured suffix (e.g., `patient_details_crfver`)
-2. Add action tag: `@DEFAULT = '[em-project-setting-value:versioning:current-project-version]'`
-3. The version will auto-populate when new records are created
+1. Create a text field in each instrument to hold the version
+2. Add the action tag `@VERSION` to it. Alternatively, name the field with the configured suffix (e.g.,
+   `patient_details_crfver`) and omit the tag
+3. The version auto-populates while the instrument has no saved data, and is fixed from the first save onwards
 
 ### Version Updates
 
@@ -252,9 +258,10 @@ The version update page (`index.php`) provides a superuser-only interface for ma
 
 ## Important Considerations
 
-- **Module Upgrades**: When upgrading REDCap, disable then re-enable the module at system level to update the Piping.php injection
-- **Existing Data**: Enabling on existing projects will populate version fields on form load, but values are not saved until form submission
-- **Single Version Field**: Only instruments with exactly one field matching the suffix are affected
+- **REDCap Upgrades**: No action required. The module modifies no core file, so a REDCap upgrade cannot undo its setup
+- **Existing Data**: Enabling on an existing project affects only instruments that have not yet been saved. Forms saved beforehand keep an empty version field permanently — the module does not back-fill them, because the version those forms were completed under is unknown. Locate them with a data quality rule
+- **Not Applied on Import**: As with core's `@DEFAULT`, the version is applied at form render only, so records created via the API or data import receive no version
+- **Single Version Field**: Where no field is tagged `@VERSION`, only instruments with exactly one field matching the suffix are affected
 - **Unconfigured Module Alert**: If the module is enabled for a project but required settings (`versioning-field-suffix` or `current-project-version`) are not configured, a JavaScript alert prompts the user to configure them
 
 ## Automated Testing

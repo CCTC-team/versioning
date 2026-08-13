@@ -15,42 +15,15 @@ so it retains the version of the form when first saved.
 
 #### System set up ####
 
-Enabling the module at a system level will AUTOMATICALLY do the following via the system hook
-`redcap_module_system_enable`;
+Enabling the module at a system level requires no further action. The module makes no changes to REDCap's own
+source files; everything it does is done through the External Module framework's hooks.
 
-1. Insert code in the `Piping.php` file - the following is inserted after the switch case statement `case "mycap-participant-link" :` around line 2036
-    ```php
-    //****** inserted by Versioning module ******
-                    case "em-project-setting-value" :
-                        $wrapThisItem = true;
-                        $module = $matches['param1'][0];
-                        $projSettingKey = $matches['param2'][0];
-
-                        $sql = "select
-                                    b.value as settingValue
-                                from
-                                    redcap_external_modules a,
-                                    redcap_external_module_settings b
-                                where
-                                    a.external_module_id = b.external_module_id
-                                    and a.directory_prefix = '$module'
-                                    and b.project_id = $project_id
-                                    and b.`key` = '$projSettingKey'";
-                                                        $q = db_query($sql);
-                                                        if (db_num_rows($q)) {
-                                                            $res = db_result($q, 0);
-                                                            $matches['post-pipe'][$key] = $res;
-                                                        }
-                        break;
-        //****** end of insert ******
-    ```
-  This makes the versioning parameter `em-project-setting-value:versioning:current-project-version` available for use in the instruments in projects.
-
-Disabling the module at a system level will AUTOMATICALLY do the following via the system hook
-`redcap_module_system_disable`.
-1. Remove the code inserted into `Piping.php`
-
-When a new version of the module becomes available, the module should be disabled and then re-enabled from the Control Center at the system level. Failure to do so may cause the module to malfunction.
+> **Upgrading from v1.1.1 or earlier.** Those versions inserted a `case "em-project-setting-value"` block into
+> REDCap's `Classes/Piping.php` when the module was enabled at system level, and removed it again when disabled.
+> That mechanism is gone. **Before deploying this version, disable the module at system level while still running
+> the old version**, so its `redcap_module_system_disable` hook removes the insert. If the new version is deployed
+> first, the removal hook no longer exists and the block is orphaned in `Piping.php`, where it must be deleted by
+> hand. See [Migrating existing projects](#migrating-existing-projects) for the project-level changes.
 
 #### Set up and configuration by project
 
@@ -81,8 +54,28 @@ Versioning index page's own version-change log, which records project version ch
 
 #### Usage
 
-Add "@DEFAULT = '[em-project-setting-value:versioning:current-project-version]'" to the version field
-of the instruments in the designer.
+Add the `@VERSION` action tag to the version field of the instruments in the designer. The tag is listed in the
+designer's **@ Action Tags** popup under this module.
+
+A field is treated as a version field if **either** of the following is true:
+
+- it carries the `@VERSION` action tag, or
+- it is the only field on the instrument whose name ends with the configured `versioning-field-suffix`
+
+The action tag takes precedence: if any field on an instrument is tagged, only tagged fields are versioned and the
+suffix is ignored for that instrument. The suffix route is retained so projects built before `@VERSION` existed keep
+working unchanged.
+
+##### Migrating existing projects
+
+Projects created against v1.1.1 or earlier carry
+`@DEFAULT = '[em-project-setting-value:versioning:current-project-version]'` on their version fields. Once the
+`Piping.php` insert is gone REDCap can no longer resolve that receiver, so it writes the tag into the field
+verbatim. Replace those annotations with `@VERSION` (or remove them and rely on the suffix).
+
+As a safety net the module treats a field whose value begins with `[em-project-setting-value:` as empty and
+overwrites it with the current version. That only helps on forms that have not yet been saved — a form already
+saved with the unresolved literal in it holds that value in the database and needs correcting as data.
 
 Link and Index page
 
@@ -97,12 +90,15 @@ is only possible if;
 
 #### Considerations
 
-The Versioning module should be added at the inception of the project. It can be enabled once data capture has started,
-but be aware that any forms containing a field with the versioning field suffix will be populated with the current
-version, but will not be stored in the database until the form has been saved.
+The Versioning module should be added at the inception of the project. It can be enabled once data capture has
+started, but be aware that the version is only applied to an instrument that has not yet been saved. Forms already
+saved before the module was enabled keep an empty version field permanently — the module deliberately does not
+back-fill them, because the version those forms were actually completed under is not known. Find them with a data
+quality rule and resolve them deliberately.
 
-To-Do
-Add a 3rd parameter to external module project setting for repeating fields
+The version is written when the form is rendered and is stored only when the form is saved, so a form that is opened
+and abandoned records nothing. As with REDCap's own `@DEFAULT`, the version is not applied to records created through
+the API or by data import.
 
 #### Automation Testing
 

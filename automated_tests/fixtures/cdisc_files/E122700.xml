@@ -124,7 +124,7 @@
 	<ItemDef OID="record_id" Name="record_id" DataType="text" Length="999" redcap:Variable="record_id" redcap:FieldType="text">
 		<Question><TranslatedText>Record ID</TranslatedText></Question>
 	</ItemDef>
-	<ItemDef OID="text_validation_crfver" Name="text_validation_crfver" DataType="text" Length="999" redcap:Variable="text_validation_crfver" redcap:FieldType="text" redcap:FieldAnnotation="@DEFAULT = &#039;[em-project-setting-value:versioning:current-project-version]&#039;">
+	<ItemDef OID="text_validation_crfver" Name="text_validation_crfver" DataType="text" Length="999" redcap:Variable="text_validation_crfver" redcap:FieldType="text">
 		<Question><TranslatedText>CRF Versioning</TranslatedText></Question>
 	</ItemDef>
 	<ItemDef OID="ptname_v2_v2" Name="ptname_v2_v2" DataType="text" Length="999" redcap:Variable="ptname_v2_v2" redcap:FieldType="text">
@@ -137,7 +137,7 @@
 		<Question><TranslatedText>Complete?</TranslatedText></Question>
 		<CodeListRef CodeListOID="text_validation_complete.choices"/>
 	</ItemDef>
-	<ItemDef OID="data_types_crfver" Name="data_types_crfver" DataType="text" Length="999" redcap:Variable="data_types_crfver" redcap:FieldType="text" redcap:FieldAnnotation="@DEFAULT = &#039;[em-project-setting-value:versioning:current-project-version]&#039;">
+	<ItemDef OID="data_types_crfver" Name="data_types_crfver" DataType="text" Length="999" redcap:Variable="data_types_crfver" redcap:FieldType="text" redcap:FieldAnnotation="@VERSION">
 		<Question><TranslatedText>CRF Versioning</TranslatedText></Question>
 	</ItemDef>
 	<ItemDef OID="ptname" Name="ptname" DataType="text" Length="999" redcap:Variable="ptname" redcap:FieldType="text">

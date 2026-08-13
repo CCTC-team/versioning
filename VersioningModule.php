@@ -2,175 +2,36 @@
 
 namespace CCTC\VersioningModule;
 
-use Exception;
+use ActionTags;
+use Records;
 use REDCap;
 use ExternalModules\AbstractExternalModule;
 
 class VersioningModule extends AbstractExternalModule {
 
-    const PipingFilePath = APP_PATH_DOCROOT . "/Classes/Piping.php";
-    const PipingCode =
-        '//****** inserted by Versioning module ******
-                    case "em-project-setting-value" :
-                        $wrapThisItem = true;
-                        $module = $matches[\'param1\'][0];
-                        $projSettingKey = $matches[\'param2\'][0];
+    /** Fields carrying this action tag are populated with the project's current version. */
+    const VersionActionTag = '@VERSION';
 
-                        // Use parameterized query to prevent SQL injection
-                        $sql = "SELECT b.value AS settingValue
-                                FROM redcap_external_modules a
-                                JOIN redcap_external_module_settings b
-                                    ON a.external_module_id = b.external_module_id
-                                WHERE a.directory_prefix = ?
-                                    AND b.project_id = ?
-                                    AND b.`key` = ?";
-                        $q = db_query($sql, [$module, $project_id, $projSettingKey]);
-                        if (db_num_rows($q)) {
-                            $res = db_result($q, 0);
-                            $matches[\'post-pipe\'][$key] = $res;
-                        }
-                        break;
-        //****** end of insert ******' . PHP_EOL;
-    const PipingSearchTerm = '      $matches[\'post-pipe\'][$key] = "<a href=\"$participant_url\" target=\"_blank\">" . RCView::escape($link_text) . "</a>";
-                            }
-                        } else {
-                            $matches[\'post-pipe\'][$key] = "";
-                        }
-                        break;
-';
+    /**
+     * Projects set up before this module stopped patching Piping.php still carry
+     * @DEFAULT = '[em-project-setting-value:versioning:current-project-version]'.
+     * With the piping receiver gone REDCap cannot resolve it and stamps the tag
+     * verbatim, so treat that literal as an empty field and overwrite it.
+     */
+    const StalePipePrefix = '[em-project-setting-value:';
 
-    // Add comprehensive error handling to addCodeToFile
-    function addCodeToFile($filePath, $searchTerm, $insertCode): bool
-    {
-        try {
-            // Validate file exists
-            if (!file_exists($filePath)) {
-                throw new Exception("Target file not found: $filePath");
-            }
-
-            // Validate file is readable
-            if (!is_readable($filePath)) {
-                throw new Exception("Target file is not readable: $filePath");
-            }
-
-            // Validate file is writable
-            if (!is_writable($filePath)) {
-                throw new Exception("Target file is not writable: $filePath");
-            }
-
-            $file_contents = file($filePath);
-            if ($file_contents === false) {
-                throw new Exception("Failed to read file: $filePath");
-            }
-
-            // Check if code already exists
-            $fullContents = implode('', $file_contents);
-            if (strpos($fullContents, $insertCode) !== false) {
-                $this->log('Piping code already exists in file', ['file' => $filePath]);
-                return true;
-            }
-
-            $found = false;
-            $searchArray = explode("\n", $searchTerm);
-            $matched = 0;
-
-            foreach ($file_contents as $index => $line) {
-                if (str_contains($line, $searchArray[$matched])) {
-                    $matched++;
-                }
-
-                if ($matched == count($searchArray) - 1) {
-                    array_splice($file_contents, $index + 1, 0, $insertCode);
-                    $found = true;
-                    break;
-                }
-            }
-
-            if (!$found) {
-                $this->log('Search term not found in file', [
-                    'file' => $filePath,
-                    'search_term' => substr($searchTerm, 0, 100) . '...'
-                ]);
-                return false;
-            }
-
-            $result = file_put_contents($filePath, implode('', $file_contents));
-            if ($result === false) {
-                throw new Exception("Failed to write file: $filePath");
-            }
-
-            $this->log('Piping code inserted successfully', ['file' => $filePath]);
-            return true;
-
-        } catch (Exception $e) {
-            $this->log('Error modifying file', [
-                'file' => $filePath,
-                'error' => $e->getMessage()
-            ]);
-            throw $e;
-        }
-    }
-
-    // Add comprehensive error handling to removeCodeFromFile
-    function removeCodeFromFile($filePath, $removeCode): bool
-    {
-        try {
-            if (!file_exists($filePath)) {
-                $this->log('File not found for code removal', ['file' => $filePath]);
-                return false;
-            }
-
-            if (!is_readable($filePath)) {
-                throw new Exception("Target file is not readable: $filePath");
-            }
-
-            if (!is_writable($filePath)) {
-                throw new Exception("Target file is not writable: $filePath");
-            }
-
-            $file_contents = file_get_contents($filePath);
-            if ($file_contents === false) {
-                throw new Exception("Failed to read file: $filePath");
-            }
-
-            if (!str_contains($file_contents, $removeCode)) {
-                $this->log('Code not found in file (may already be removed)', ['file' => $filePath]);
-                return true;
-            }
-
-            $modified_contents = str_replace($removeCode, "", $file_contents);
-            $result = file_put_contents($filePath, $modified_contents);
-
-            if ($result === false) {
-                throw new Exception("Failed to write file: $filePath");
-            }
-
-            $this->log('Piping code removed successfully', ['file' => $filePath]);
-            return true;
-
-        } catch (Exception $e) {
-            $this->log('Error removing code from file', [
-                'file' => $filePath,
-                'error' => $e->getMessage()
-            ]);
-            throw $e;
-        }
+    public function redcap_module_link_check_display($project_id, $link) {
+        return $link;
     }
 
     function redcap_module_system_enable($version): void
     {
         $this->log('Module system enable initiated', ['version' => $version]);
-        self::addCodeToFile(self::PipingFilePath, self::PipingSearchTerm, self::PipingCode);
     }
 
     function redcap_module_system_disable($version): void
     {
         $this->log('Module system disable initiated', ['version' => $version]);
-        self::removeCodeFromFile(self::PipingFilePath, self::PipingCode);
-    }
-
-    public function redcap_module_link_check_display($project_id, $link) {
-        return $link;
     }
 
     public function validateSettings($settings): ?string
@@ -201,28 +62,49 @@ class VersioningModule extends AbstractExternalModule {
         ]);
     }
 
-    function HideMarkAsMissingIcon($crfVerField): void
+    /**
+     * Fields on this instrument that carry the project version: those annotated
+     * @VERSION, or - for projects set up before the tag existed - the single
+     * field whose name ends with the configured suffix.
+     */
+    private function versionFields($project_id, string $instrument): array
     {
-        //if the form has mark as missing icons, need to prevent the user being able to
-        //clear the value in the _crfver field
-        // Escape field name for JavaScript
-        $escapedField = htmlspecialchars($crfVerField, ENT_QUOTES, 'UTF-8');
+        $dictionary = REDCap::getDataDictionary($project_id, 'array', false, [], [$instrument]);
 
-        echo "<script type='text/javascript'>
-                let markImage = document.querySelector('img.missingDataButton[fieldname=\"{$escapedField}\"]');
-                if(markImage) {
-                    markImage.style.display = 'none';
-                }
-            </script>";
+        $tagged = [];
+        foreach ($dictionary as $field => $meta) {
+            if (ActionTags::containsActionTags($meta['field_annotation'] ?? '', self::VersionActionTag)) {
+                $tagged[] = $field;
+            }
+        }
+        if (!empty($tagged)) return $tagged;
+
+        $suffix = $this->getProjectSetting("versioning-field-suffix");
+        if (empty($suffix)) return [];
+
+        $bySuffix = array_values(array_filter(
+            array_keys($dictionary),
+            fn($field) => str_ends_with($field, $suffix)
+        ));
+
+        // As before, an ambiguous form is left alone: versioning applies only
+        // where exactly one field matches.
+        return count($bySuffix) == 1 ? $bySuffix : [];
     }
 
     /**
-     * @throws Exception
+     * Mirrors core's @DEFAULT condition (Classes/DataEntry.php): a default is
+     * only applied while the instrument instance has never been saved, so a
+     * form permanently retains the version it was first completed under.
      */
-    public function redcap_data_entry_form($project_id, $record, $instrument, $event_id, $group_id, $repeat_instance): void
+    private function isUnsavedForm($record, string $instrument, $event_id, $repeat_instance): bool
     {
-        //if the form doesn't have a crf version field nothing happens
-        //sets the version of the form if empty
+        if ($record === null || $record === '') return true;
+        return !Records::formHasData($record, $instrument, $event_id, $repeat_instance ?: 1);
+    }
+
+    private function applyVersioning($project_id, $record, string $instrument, $event_id, $repeat_instance, bool $allowReadonly): void
+    {
         if (empty($project_id)) return;
 
         // Retrieve the mandatory fields for the external module from the configuration settings
@@ -236,25 +118,112 @@ class VersioningModule extends AbstractExternalModule {
             return;
         }
 
-        $fields = REDCap::getFieldNames($instrument);
-        $crfVerFields = array_filter($fields, function($field) use ($crfVerFieldSuffix) {
-            return str_ends_with($field, $crfVerFieldSuffix);
-        });
+        $fields = $this->versionFields($project_id, $instrument);
+        if (empty($fields)) return;
 
-        if (count($crfVerFields) == 1) {
-            $crfVerField = reset($crfVerFields);
+        $setReadonly = $allowReadonly && (bool) $this->getProjectSetting("version-field-auto-set-as-readonly");
 
-            $this->HideMarkAsMissingIcon($crfVerField);
+        $this->emitVersionScript(
+            $fields,
+            trim((string) $curProjectVersion),
+            $this->isUnsavedForm($record, $instrument, $event_id, $repeat_instance),
+            $setReadonly
+        );
+    }
 
-            $setAsReadonly = $this->getProjectSetting("version-field-auto-set-as-readonly");
-            if ($setAsReadonly) {
-                $escapedField = htmlspecialchars($crfVerField, ENT_QUOTES, 'UTF-8');
-                echo "<script type='text/javascript'>
-document.querySelector('#' + '{$escapedField}' + '-tr').classList.add('@READONLY');
-</script>
-";
+    private function emitVersionScript(array $fields, string $version, bool $setValue, bool $setReadonly): void
+    {
+        $config = json_encode([
+            'fields'    => array_values($fields),
+            'version'   => $version,
+            'setValue'  => $setValue,
+            'readonly'  => $setReadonly,
+            'stalePipe' => self::StalePipePrefix,
+        ], JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT);
+
+        echo <<<HTML
+<script type="text/javascript">
+(function () {
+    var cfg = {$config};
+
+    function applyVersioning() {
+        cfg.fields.forEach(function (field) {
+            var input = document.querySelector('[name="' + field + '"]');
+
+            if (input && cfg.setValue) {
+                var current = (input.value || '').trim();
+                if (current === '' || current.indexOf(cfg.stalePipe) === 0) {
+                    // Assigning .value fires no events, so REDCap's
+                    // dataEntryFormValuesChanged flag stays false and the user is
+                    // not prompted to save a form they have only looked at.
+                    input.value = cfg.version;
+                }
             }
-        }
+
+            if (cfg.readonly) {
+                var row = document.getElementById(field + '-tr');
+                if (row) row.classList.add('@READONLY');
+            }
+
+            // If the form has mark as missing icons, prevent the user clearing
+            // the value in the version field.
+            var missing = document.querySelector('img.missingDataButton[fieldname="' + field + '"]');
+            if (missing) missing.style.display = 'none';
+        });
+    }
+
+    /**
+     * REDCap evaluates branching logic and calculations from the values present
+     * when the page initialises. The version is written afterwards and without
+     * firing change events, so logic keyed on the version field would still see
+     * it as empty - and in JavaScript an empty value coerces to 0, silently
+     * flipping comparisons such as [version] > 2. Re-run REDCap's own evaluators,
+     * exactly as core does after it changes a value programmatically (see the
+     * reset-value link in Classes/DataEntry.php). setDataEntryFormValuesChanged()
+     * is deliberately NOT called, so the form is still not marked as edited.
+     */
+    function retriggerLogic() {
+        if (!cfg.setValue) return;
+        cfg.fields.forEach(function (field) {
+            try { if (typeof calculate === 'function') calculate(field); } catch (e) {}
+            try { if (typeof doBranching === 'function') doBranching(field); } catch (e) {}
+        });
+    }
+
+    // The hook renders after the form, so the inputs already exist: set the
+    // value straight away rather than waiting, to avoid a visible flicker.
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', applyVersioning);
+    } else {
+        applyVersioning();
+    }
+
+    // Re-evaluation must happen after REDCap's own page initialisation. jQuery
+    // ready callbacks run in registration order and REDCap registers its own
+    // well before this point, so ours runs last.
+    if (window.jQuery) {
+        window.jQuery(retriggerLogic);
+    } else if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', retriggerLogic);
+    } else {
+        retriggerLogic();
+    }
+})();
+</script>
+HTML;
+    }
+
+    public function redcap_data_entry_form($project_id, $record, $instrument, $event_id, $group_id, $repeat_instance): void
+    {
+        $this->applyVersioning($project_id, $record, $instrument, $event_id, $repeat_instance, true);
+    }
+
+    public function redcap_survey_page($project_id, $record, $instrument, $event_id, $group_id, $survey_hash, $response_id, $repeat_instance): void
+    {
+        // Surveys were previously versioned by core's @DEFAULT handling, which
+        // applies on survey pages too. The readonly setting has never applied
+        // there, so it stays off.
+        $this->applyVersioning($project_id, $record, $instrument, $event_id, $repeat_instance, false);
     }
 
     public function redcap_module_save_configuration($project_id): void
