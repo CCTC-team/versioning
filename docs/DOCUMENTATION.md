@@ -134,7 +134,9 @@ to the module's settings.
 | Constant | Description |
 |----------|-------------|
 | `PipingFilePath` | Path to `APP_PATH_DOCROOT/Classes/Piping.php` |
-| `PipingCode` | SQL case handler code injected into Piping.php |
+| `PipingMarkerStart` | Opening marker delimiting the inserted block |
+| `PipingMarkerEnd` | Closing marker delimiting the inserted block |
+| `PipingCode` | SQL case handler code injected into Piping.php, wrapped in the two markers |
 | `PipingSearchTerm` | Search pattern used to locate the injection point |
 
 #### Hook Methods
@@ -151,8 +153,10 @@ to the module's settings.
 
 | Method | Returns | Description |
 |--------|---------|-------------|
-| `addCodeToFile($filePath, $searchTerm, $insertCode)` | `bool` | Injects code into a target file. Includes comprehensive error handling: validates file existence, readability, writability; checks for duplicate injection; logs success/failure. Throws `Exception` on error. |
-| `removeCodeFromFile($filePath, $removeCode)` | `bool` | Removes injected code from a target file. Includes error handling similar to `addCodeToFile()`. Returns `true` if code was not found (idempotent). |
+| `addCodeToFile($filePath, $searchTerm, $insertCode)` | `bool` | Injects code into a target file. Validates file existence, readability and writability; logs success/failure; throws `Exception` on error. Returns early if the file already holds exactly this block. Otherwise strips any block present — a duplicate, or one written by an earlier module version — before inserting, so blocks can never stack. |
+| `removeCodeFromFile($filePath)` | `bool` | Removes **every** inserted block, matched on `PipingMarkerStart`/`PipingMarkerEnd` rather than on the current `PipingCode` text. Returns `true` when nothing was found (idempotent). Logs the number of blocks removed. |
+| `insertedBlockPattern()` | `string` | Regex matching a whole marker-delimited block. |
+| `stripInsertedBlocks($contents)` | `array` | `[contents, blocksRemoved]` with every block removed. |
 | `HideMarkAsMissingIcon($crfVerField)` | `void` | Outputs JavaScript to hide the mark-as-missing icon for the version field. Escapes the field name with `htmlspecialchars()`. |
 | `logVersionChange($oldVersion, $newVersion)` | `void` | Records a version change in the module's audit log with project ID, old/new version, user ID, and timestamp. |
 
@@ -191,6 +195,17 @@ WHERE a.directory_prefix = ?
 ```
 
 ### Error Handling for File Operations
+
+### Why removal is marker-based
+
+Removal deliberately does not search for the current `PipingCode` text. Since REDCap 12.0.4 a version change
+calls `redcap_module_system_enable()` on the new version **without** calling the old version's
+`redcap_module_system_disable()` (see the External Modules framework `hooks.md`). If an admin switches version
+using the Module Manager dropdown rather than disabling first, an exact-text removal would fail to find the older
+version's block and leave it in place. The result is two `case "em-project-setting-value"` labels in the same
+`switch`, which PHP accepts silently, using whichever appears first — so the module could go on running code from
+the previous version with no error anywhere. Matching on the markers finds any block regardless of which version
+wrote it.
 
 Both `addCodeToFile()` and `removeCodeFromFile()` include:
 - File existence validation

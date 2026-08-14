@@ -9,12 +9,31 @@ use ExternalModules\AbstractExternalModule;
 class VersioningModule extends AbstractExternalModule {
 
     const PipingFilePath = APP_PATH_DOCROOT . "/Classes/Piping.php";
-    const PipingCode =
-        '//****** inserted by Versioning module ******
+    // Markers delimiting the inserted block. Removal matches on these rather than
+    // on the PipingCode text, so a block written by an EARLIER module version is
+    // still found: REDCap calls redcap_module_system_enable() on a version change
+    // without calling the old version's disable hook, and PHP accepts duplicate
+    // case labels silently, using whichever appears first.
+    const PipingMarkerStart = '//****** inserted by Versioning module ******';
+    const PipingMarkerEnd   = '//****** end of insert ******';
+
+    const PipingCode = self::PipingMarkerStart . '
                     case "em-project-setting-value" :
                         $wrapThisItem = true;
-                        $module = $matches[\'param1\'][0];
-                        $projSettingKey = $matches[\'param2\'][0];
+                        $module = $matches[\'param1\'][$key];
+                        $projSettingKey = $matches[\'param2\'][$key];
+                        // Optional third parameter: selects one entry of a repeatable
+                        // setting or sub_settings group. 1-based, to match REDCap\'s
+                        // repeat instances.
+                        $settingIndex = trim($matches[\'param3\'][$key] ?? "");
+                        if ($settingIndex === "") {
+                            // "Place instance in proper place" earlier in this file moves
+                            // any NUMERIC trailing parameter into \'instance\' and blanks
+                            // the original, so a numeric index never survives in param3.
+                            // This receiver has no record-instance meaning, so recover it.
+                            $fromInstance = trim($matches[\'instance\'][$key] ?? "");
+                            if (is_numeric($fromInstance)) $settingIndex = $fromInstance;
+                        }
 
                         // Use parameterized query to prevent SQL injection
                         $sql = "SELECT b.value AS settingValue
@@ -27,10 +46,27 @@ class VersioningModule extends AbstractExternalModule {
                         $q = db_query($sql, [$module, $project_id, $projSettingKey]);
                         if (db_num_rows($q)) {
                             $res = db_result($q, 0);
+                            if ($settingIndex !== "") {
+                                // Repeatable settings and sub_settings are stored
+                                // JSON-encoded. Anything we cannot resolve to a scalar
+                                // yields "", as piping does elsewhere.
+                                $decoded = is_numeric($settingIndex) ? json_decode($res, true) : null;
+                                $offset = (int)$settingIndex - 1;
+                                $res = (is_array($decoded) && $offset >= 0 && isset($decoded[$offset]) && is_scalar($decoded[$offset]))
+                                     ? (string)$decoded[$offset]
+                                     : "";
+                            }
                             $matches[\'post-pipe\'][$key] = $res;
+                        } else {
+                            // post-pipe MUST be set on every path. It is paired with
+                            // pre-pipe positionally by the preg_replace at the end of
+                            // pipeSpecialTags, so a missing entry shifts every later
+                            // tag onto the wrong value rather than merely blanking
+                            // this one.
+                            $matches[\'post-pipe\'][$key] = "";
                         }
                         break;
-        //****** end of insert ******' . PHP_EOL;
+        ' . self::PipingMarkerEnd . PHP_EOL;
     const PipingSearchTerm = '      $matches[\'post-pipe\'][$key] = "<a href=\"$participant_url\" target=\"_blank\">" . RCView::escape($link_text) . "</a>";
                             }
                         } else {
@@ -38,6 +74,24 @@ class VersioningModule extends AbstractExternalModule {
                         }
                         break;
 ';
+
+    /** Regex matching any whole block this module has ever inserted, markers included. */
+    private static function insertedBlockPattern(): string
+    {
+        return '#[ \t]*' . preg_quote(self::PipingMarkerStart, '#')
+             . '.*?' . preg_quote(self::PipingMarkerEnd, '#') . '[ \t]*\R#s';
+    }
+
+    /** Strip every inserted block. Returns [contents, blocksRemoved]. */
+    private static function stripInsertedBlocks(string $contents): array
+    {
+        $count = 0;
+        $stripped = preg_replace(self::insertedBlockPattern(), '', $contents, -1, $count);
+        if ($stripped === null) {
+            throw new Exception('Failed to strip inserted code (preg_replace error)');
+        }
+        return [$stripped, $count];
+    }
 
     // Add comprehensive error handling to addCodeToFile
     function addCodeToFile($filePath, $searchTerm, $insertCode): bool
@@ -58,17 +112,21 @@ class VersioningModule extends AbstractExternalModule {
                 throw new Exception("Target file is not writable: $filePath");
             }
 
-            $file_contents = file($filePath);
-            if ($file_contents === false) {
+            $fullContents = file_get_contents($filePath);
+            if ($fullContents === false) {
                 throw new Exception("Failed to read file: $filePath");
             }
 
-            // Check if code already exists
-            $fullContents = implode('', $file_contents);
-            if (strpos($fullContents, $insertCode) !== false) {
+            // Already correct: exactly our block, and nothing stale alongside it.
+            [$withoutBlocks, $existingBlocks] = self::stripInsertedBlocks($fullContents);
+            if ($existingBlocks == 1 && strpos($fullContents, $insertCode) !== false) {
                 $this->log('Piping code already exists in file', ['file' => $filePath]);
                 return true;
             }
+
+            // Otherwise drop whatever is there (a duplicate, or a block written by an
+            // earlier module version) so the insert below cannot stack on top of it.
+            $file_contents = preg_split('/(?<=\n)/', $withoutBlocks, -1, PREG_SPLIT_NO_EMPTY);
 
             $found = false;
             $searchArray = explode("\n", $searchTerm);
@@ -112,7 +170,7 @@ class VersioningModule extends AbstractExternalModule {
     }
 
     // Add comprehensive error handling to removeCodeFromFile
-    function removeCodeFromFile($filePath, $removeCode): bool
+    function removeCodeFromFile($filePath): bool
     {
         try {
             if (!file_exists($filePath)) {
@@ -133,19 +191,23 @@ class VersioningModule extends AbstractExternalModule {
                 throw new Exception("Failed to read file: $filePath");
             }
 
-            if (!str_contains($file_contents, $removeCode)) {
+            [$modified_contents, $blocksRemoved] = self::stripInsertedBlocks($file_contents);
+
+            if ($blocksRemoved === 0) {
                 $this->log('Code not found in file (may already be removed)', ['file' => $filePath]);
                 return true;
             }
 
-            $modified_contents = str_replace($removeCode, "", $file_contents);
             $result = file_put_contents($filePath, $modified_contents);
 
             if ($result === false) {
                 throw new Exception("Failed to write file: $filePath");
             }
 
-            $this->log('Piping code removed successfully', ['file' => $filePath]);
+            $this->log('Piping code removed successfully', [
+                'file' => $filePath,
+                'blocks_removed' => $blocksRemoved
+            ]);
             return true;
 
         } catch (Exception $e) {
@@ -166,7 +228,7 @@ class VersioningModule extends AbstractExternalModule {
     function redcap_module_system_disable($version): void
     {
         $this->log('Module system disable initiated', ['version' => $version]);
-        self::removeCodeFromFile(self::PipingFilePath, self::PipingCode);
+        self::removeCodeFromFile(self::PipingFilePath);
     }
 
     public function redcap_module_link_check_display($project_id, $link) {
