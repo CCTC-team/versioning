@@ -218,6 +218,7 @@ Feature: E.122.700 - The system shall support the ability to setup CRF versionin
 
     # Repeating Events - Instance 2
     Given I click on the button labeled "Add new"
+    Then I should see "NEW"
     When I click the bubble to add a record for the "Data Types" longitudinal instrument on event "(NEW)"
     Then I should see "Editing existing Record ID 4"
     And I should see "Data Types"
