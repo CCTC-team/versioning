@@ -84,6 +84,26 @@ The module extends REDCap's piping functionality by injecting a custom case hand
 
 This piping parameter can be used in `@DEFAULT` action tags to automatically populate version fields when new forms are created.
 
+The receiver is generic and resolves a project setting of any module enabled on the project. An optional third
+parameter selects one entry of a repeatable setting or `sub_settings` group, 1-based to match REDCap's repeat
+instances:
+
+```
+[em-project-setting-value:<module_directory_prefix>:<setting_key>]
+[em-project-setting-value:<module_directory_prefix>:<setting_key>:<index>]
+```
+
+Note the index is **not** read from `param3`. The "Place instance in proper place" block in
+`Piping::pipeSpecialTags()` scans `param3`, `param2` then `param1`, moves the first numeric value it finds into
+`instance`, and blanks the original — so a numeric third parameter never survives in `param3`. The insert
+therefore falls back to reading `instance`. The same applies to `param2`: a module whose setting key were bare
+digits would have its key swallowed the same way.
+
+Every unresolvable case yields an empty string, and `post-pipe` is assigned on **every** path. That matters
+because `pre-pipe` and `post-pipe` are consumed as parallel arrays by the `preg_replace` at the end of
+`pipeSpecialTags()`, which pairs them positionally rather than by key: leaving `post-pipe` unset for one tag
+substitutes every later tag in that string with the wrong value, rather than merely blanking its own.
+
 > **Known Issue (P0 - Critical):** The piping injection modifies a core REDCap file (`Classes/Piping.php`), which will be overwritten on REDCap upgrades.
 
 ### 2. Automatic Version Field Population

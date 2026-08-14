@@ -84,6 +84,27 @@ Versioning index page's own version-change log, which records project version ch
 Add "@DEFAULT = '[em-project-setting-value:versioning:current-project-version]'" to the version field
 of the instruments in the designer.
 
+The receiver is generic - it resolves a project setting belonging to any module enabled on the project, not
+just this one:
+
+```
+[em-project-setting-value:<module_directory_prefix>:<setting_key>]
+```
+
+An optional third parameter selects a single entry from a repeatable setting or a `sub_settings` group. It is
+1-based, matching REDCap's repeat instances:
+
+```
+[em-project-setting-value:<module_directory_prefix>:<setting_key>:<index>]
+```
+
+For example, with a repeatable setting holding `["3","4"]`, index `1` gives `3` and index `2` gives `4`.
+Omit the index and the raw stored value is returned, which for a repeatable setting is its JSON array.
+
+The receiver resolves to an empty string whenever it cannot produce a single value: an unknown module or
+setting key, an index given for a setting that is not repeatable, an index out of range, or an entry that is
+itself an array rather than a scalar.
+
 Link and Index page
 
 All users can view the current version using the External Modules link called 'Versioning' in the left pane. For 
@@ -100,9 +121,6 @@ is only possible if;
 The Versioning module should be added at the inception of the project. It can be enabled once data capture has started,
 but be aware that any forms containing a field with the versioning field suffix will be populated with the current
 version, but will not be stored in the database until the form has been saved.
-
-To-Do
-Add a 3rd parameter to external module project setting for repeating fields
 
 #### Automation Testing
 
