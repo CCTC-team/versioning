@@ -18,33 +18,74 @@ so it retains the version of the form when first saved.
 Enabling the module at a system level will AUTOMATICALLY do the following via the system hook
 `redcap_module_system_enable`;
 
-1. Insert code in the `Piping.php` file - the following is inserted after the switch case statement `case "mycap-participant-link" :` around line 2036
+1. Insert code in the `Piping.php` file - the block below is inserted into the `switch ($value)` block in
+   `Piping::pipeSpecialTags()`, immediately after the `break;` that closes `case "mycap-participant-link" :`.
+   That `break;` is at line 2035 in REDCap 14.7.0, 2073 in 15.5.36 and 2180 in 16.0.38 — the module locates it
+   by searching for the surrounding code, not by line number.
     ```php
     //****** inserted by Versioning module ******
                     case "em-project-setting-value" :
                         $wrapThisItem = true;
-                        $module = $matches['param1'][0];
-                        $projSettingKey = $matches['param2'][0];
+                        $module = $matches['param1'][$key];
+                        $projSettingKey = $matches['param2'][$key];
+                        // Optional third parameter: selects one entry of a repeatable
+                        // setting or sub_settings group. 1-based, to match REDCap's
+                        // repeat instances.
+                        $settingIndex = trim($matches['param3'][$key] ?? "");
+                        if ($settingIndex === "") {
+                            // "Place instance in proper place" earlier in this file moves
+                            // any NUMERIC trailing parameter into 'instance' and blanks
+                            // the original, so a numeric index never survives in param3.
+                            // This receiver has no record-instance meaning, so recover it.
+                            $fromInstance = trim($matches['instance'][$key] ?? "");
+                            if (is_numeric($fromInstance)) $settingIndex = $fromInstance;
+                        }
 
-                        $sql = "select
-                                    b.value as settingValue
-                                from
-                                    redcap_external_modules a,
-                                    redcap_external_module_settings b
-                                where
-                                    a.external_module_id = b.external_module_id
-                                    and a.directory_prefix = '$module'
-                                    and b.project_id = $project_id
-                                    and b.`key` = '$projSettingKey'";
-                                                        $q = db_query($sql);
-                                                        if (db_num_rows($q)) {
-                                                            $res = db_result($q, 0);
-                                                            $matches['post-pipe'][$key] = $res;
-                                                        }
+                        // Use parameterized query to prevent SQL injection
+                        $sql = "SELECT b.value AS settingValue
+                                FROM redcap_external_modules a
+                                JOIN redcap_external_module_settings b
+                                    ON a.external_module_id = b.external_module_id
+                                WHERE a.directory_prefix = ?
+                                    AND b.project_id = ?
+                                    AND b.`key` = ?";
+                        $q = db_query($sql, [$module, $project_id, $projSettingKey]);
+                        if (db_num_rows($q)) {
+                            $res = db_result($q, 0);
+                            if ($settingIndex !== "") {
+                                // Repeatable settings and sub_settings are stored
+                                // JSON-encoded. Anything we cannot resolve to a scalar
+                                // yields "", as piping does elsewhere.
+                                $decoded = is_numeric($settingIndex) ? json_decode($res, true) : null;
+                                $offset = (int)$settingIndex - 1;
+                                $res = (is_array($decoded) && $offset >= 0 && isset($decoded[$offset]) && is_scalar($decoded[$offset]))
+                                     ? (string)$decoded[$offset]
+                                     : "";
+                            }
+                            $matches['post-pipe'][$key] = $res;
+                        } else {
+                            // post-pipe MUST be set on every path. It is paired with
+                            // pre-pipe positionally by the preg_replace at the end of
+                            // pipeSpecialTags, so a missing entry shifts every later
+                            // tag onto the wrong value rather than merely blanking
+                            // this one.
+                            $matches['post-pipe'][$key] = "";
+                        }
                         break;
         //****** end of insert ******
     ```
   This makes the versioning parameter `em-project-setting-value:versioning:current-project-version` available for use in the instruments in projects.
+
+  The receiver is generic — it resolves a project setting of **any** module enabled on the project, not just this
+  one, with an optional 1-based index selecting one entry of a repeatable setting or `sub_settings` group:
+
+    ```
+    [em-project-setting-value:<module_directory_prefix>:<setting_key>]
+    [em-project-setting-value:<module_directory_prefix>:<setting_key>:<index>]
+    ```
+
+  See [DOCUMENTATION.md](docs/DOCUMENTATION.md#1-custom-piping-parameter) for the behaviour of the index
+  parameter and why `post-pipe` must be assigned on every path.
 
 Disabling the module at a system level will AUTOMATICALLY do the following via the system hook
 `redcap_module_system_disable`.
