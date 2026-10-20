@@ -26,7 +26,7 @@ Feature: E.122.700 - The system shall support the ability to setup CRF versionin
  
   Scenario: Enable external module in project
     Given I create a new project named "E.122.700" by clicking on "New Project" in the menu bar, selecting "Practice / Just for fun" from the dropdown, choosing file "fixtures/cdisc_files/E122700.xml", and clicking the "Create Project" button
-    And I click on the link labeled "Manage"
+    And I click on the second link labeled "Manage"
     Then I should see "External Modules - Project Module Manager"
     When I click on the button labeled "Enable a module"
     And I click on the button labeled "Enable" in the row labeled "Versioning - v1.1.1"
@@ -43,7 +43,7 @@ Feature: E.122.700 - The system shall support the ability to setup CRF versionin
     Then I should see "The current version is 0"
 
     # Super-Admins can down-version
-    Given I click on the link labeled "Manage"
+    Given I click on the second link labeled "Manage"
     When I click on the button labeled "Configure"
     Then I should see "Configure Module"
     # negative values can be entered
@@ -54,7 +54,7 @@ Feature: E.122.700 - The system shall support the ability to setup CRF versionin
     Then I should see "The current version is -1"
 
     # Upversion from configuration settings
-    Given I click on the link labeled "Manage"
+    Given I click on the second link labeled "Manage"
     When I click on the button labeled "Configure"
     Then I should see "Configure Module"
     And I clear field and enter "1" into the input field labeled "The current crf version"
@@ -78,7 +78,7 @@ Feature: E.122.700 - The system shall support the ability to setup CRF versionin
     When I click on the link labeled "My Projects"
     And I click on the link labeled "E.122.700"
     Then I should see "Project Home and Design"
-    When I click on the link labeled "Manage"
+    When I click on the second link labeled "Manage"
     Then I should see "External Modules - Project Module Manager"
     # E.122.900 - Only Super-admins can configure external Module
     #And I should NOT see the button labeled "Disable"
@@ -118,7 +118,7 @@ Feature: E.122.700 - The system shall support the ability to setup CRF versionin
     And I click on the link labeled "E.122.700"
     
     #E.122.800 - Configure Versioning field as readonly
-    Given I click on the link labeled "Manage"
+    Given I click on the second link labeled "Manage"
     Then I should see "External Modules - Project Module Manager"
     And I click on the button labeled "Configure"
     And I check the checkbox labeled "If checked, any fields identified as versioning fields will be automatically set as readonly"
@@ -172,7 +172,7 @@ Feature: E.122.700 - The system shall support the ability to setup CRF versionin
     And I click on the button labeled "Cancel"
 
     # Updating the version number in the configuration settings
-    Given I click on the link labeled "Manage"
+    Given I click on the second link labeled "Manage"
     Then I should see "External Modules - Project Module Manager"
     And I click on the button labeled "Configure"
     Then I should see "3"
@@ -229,7 +229,7 @@ Feature: E.122.700 - The system shall support the ability to setup CRF versionin
 
   Scenario: E.122.100 - Disable external module
     # Disable external module in project
-    Given I click on the link labeled "Manage"
+    Given I click on the second link labeled "Manage"
     Then I should see "External Modules - Project Module Manager"
     And I should see "Versioning - v1.1.1"
     When I click on the button labeled "Disable"

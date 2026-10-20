@@ -20,7 +20,7 @@ Feature: E.122.1300 - The system shall record configuration changes for the Vers
 
   Scenario: First configuration save logs the initial values
     Given I create a new project named "E.122.1300" by clicking on "New Project" in the menu bar, selecting "Practice / Just for fun" from the dropdown, choosing file "fixtures/cdisc_files/Project_redcap_val_nodata.xml", and clicking the "Create Project" button
-    And I click on the link labeled "Manage"
+    And I click on the second link labeled "Manage"
     Then I should see "External Modules - Project Module Manager"
     When I click on the button labeled "Enable a module"
     And I click on the button labeled "Enable" in the row labeled "Versioning - v1.1.1"
@@ -55,8 +55,8 @@ Feature: E.122.1300 - The system shall record configuration changes for the Vers
     And I should see a table header and row containing the following values in a table:
       | Name      | Value                              |
       | setting   | version-field-auto-set-as-readonly |
-      | old_value | (empty)                            |
       | new_value | 1                                  |
+      | old_value | (empty)                            |
     And I click on the button labeled "Close"
     Then I should see "External Module Logs"
 
@@ -65,8 +65,8 @@ Feature: E.122.1300 - The system shall record configuration changes for the Vers
     And I should see a table header and row containing the following values in a table:
       | Name      | Value                   |
       | setting   | current-project-version |
-      | old_value | (empty)                 |
       | new_value | 1                       |
+      | old_value | (empty)                 |
 
   Scenario: Changing a setting logs an old->new audit entry
     # rctf starts each scenario from a clean browser page, so re-navigate to the
@@ -74,7 +74,7 @@ Feature: E.122.1300 - The system shall record configuration changes for the Vers
     Given I login to REDCap with the user "Test_Admin"
     When I click on the link labeled "My Projects"
     And I click on the link labeled "E.122.1300"
-    And I click on the link labeled "Manage"
+    And I click on the second link labeled "Manage"
     Then I should see "External Modules - Project Module Manager"
     And I should see "Versioning - v1.1.1"
 
@@ -101,8 +101,8 @@ Feature: E.122.1300 - The system shall record configuration changes for the Vers
     And I should see a table header and row containing the following values in a table:
       | Name      | Value                   |
       | setting   | versioning-field-suffix |
-      | old_value | crfver                  |
       | new_value | crfversion              |
+      | old_value | crfver                  |
     And I click on the button labeled "Close"
     Then I should see "External Module Logs"
 
