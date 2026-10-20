@@ -58,7 +58,11 @@ Feature: E.122.1300 - The system shall record configuration changes for the Vers
     And I should see a table header and row containing the following values in a table:
       | Name      | Value                              |
       | setting   | version-field-auto-set-as-readonly |
+    And I should see a table header and row containing the following values in a table:
+      | Name      | Value                              |
       | new_value | 1                                  |
+    And I should see a table header and row containing the following values in a table:
+      | Name      | Value                              |
       | old_value | (empty)                            |
     And I click on the button labeled "Close"
     Then I should see "External Module Logs"
@@ -68,7 +72,11 @@ Feature: E.122.1300 - The system shall record configuration changes for the Vers
     And I should see a table header and row containing the following values in a table:
       | Name      | Value                   |
       | setting   | current-project-version |
+    And I should see a table header and row containing the following values in a table:
+      | Name      | Value                   |
       | new_value | 1                       |
+    And I should see a table header and row containing the following values in a table:
+      | Name      | Value                   |
       | old_value | (empty)                 |
 
   Scenario: Changing a setting logs an old->new audit entry
@@ -104,7 +112,11 @@ Feature: E.122.1300 - The system shall record configuration changes for the Vers
     And I should see a table header and row containing the following values in a table:
       | Name      | Value                   |
       | setting   | versioning-field-suffix |
+    And I should see a table header and row containing the following values in a table:
+      | Name      | Value                   |
       | new_value | crfversion              |
+    And I should see a table header and row containing the following values in a table:
+      | Name      | Value                   |
       | old_value | crfver                  |
     And I click on the button labeled "Close"
     Then I should see "External Module Logs"

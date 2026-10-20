@@ -284,8 +284,14 @@ Feature: E.122.700 - The system shall support the ability to setup CRF versionin
     And I should see a table header and row containing the following values in a table:
       | Name        | Value               |
       | old_version | 1                   |
+    And I should see a table header and row containing the following values in a table:
+      | Name        | Value               |
       | updated_at  | yyyy-mm-dd hh:mm:ss |
+    And I should see a table header and row containing the following values in a table:
+      | Name        | Value               |
       | new_version | 3                   |
+    And I should see a table header and row containing the following values in a table:
+      | Name        | Value               |
       | updated_by  | test_admin          |
 
     And I click on the button labeled "Close"
