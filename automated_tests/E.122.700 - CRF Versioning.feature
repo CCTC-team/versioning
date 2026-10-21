@@ -15,22 +15,25 @@ Feature: E.122.700 - The system shall support the ability to setup CRF versionin
 
     Given I click on the link labeled "Manage"
     Then I should see "External Modules - Module Manager"
-    And I should NOT see "Versioning - v1.1.1"
+    And I click on the button labeled "Disable"
+    Then I should see "Disable module?"
+    When I click on the button labeled "Disable module"
+    Then I should NOT see "Versioning - v1.1.2"
     When I click on the button labeled "Enable a module"
     And I wait for 2 seconds
     Then I should see "Available Modules"
     And I click on the button labeled "Enable" in the row labeled "Versioning"
     And I wait for 1 second
     And I click on the button labeled "Enable"
-    Then I should see "Versioning - v1.1.1"
+    Then I should see "Versioning - v1.1.2"
  
   Scenario: Enable external module in project
     Given I create a new project named "E.122.700" by clicking on "New Project" in the menu bar, selecting "Practice / Just for fun" from the dropdown, choosing file "fixtures/cdisc_files/E122700.xml", and clicking the "Create Project" button
-    And I click on the link labeled "Manage"
+    And I click on the second link labeled "Manage"
     Then I should see "External Modules - Project Module Manager"
     When I click on the button labeled "Enable a module"
-    And I click on the button labeled "Enable" in the row labeled "Versioning - v1.1.1"
-    Then I should see "Versioning - v1.1.1"
+    And I click on the button labeled "Enable" in the row labeled "Versioning - v1.1.2"
+    Then I should see "Versioning - v1.1.2"
 
     # E.122.700, E.122.900 - Only Super-admins can configure external Module
     Given I click on the button labeled "Configure"
@@ -38,28 +41,28 @@ Feature: E.122.700 - The system shall support the ability to setup CRF versionin
     When I enter "crfver" into the input field labeled "Provide the suffix"
     And I enter "0" into the input field labeled "The current crf version"
     Then I click on the button labeled "Save"
-    Then I should see "Versioning - v1.1.1"
+    Then I should see "Versioning - v1.1.2"
     When I click on the link labeled "Versioning"
     Then I should see "The current version is 0"
 
     # Super-Admins can down-version
-    Given I click on the link labeled "Manage"
+    Given I click on the second link labeled "Manage"
     When I click on the button labeled "Configure"
     Then I should see "Configure Module"
     # negative values can be entered
     And I clear field and enter "-1" into the input field labeled "The current crf version"
     Then I click on the button labeled "Save"
-    Then I should see "Versioning - v1.1.1"
+    Then I should see "Versioning - v1.1.2"
     When I click on the link labeled "Versioning"
     Then I should see "The current version is -1"
 
     # Upversion from configuration settings
-    Given I click on the link labeled "Manage"
+    Given I click on the second link labeled "Manage"
     When I click on the button labeled "Configure"
     Then I should see "Configure Module"
     And I clear field and enter "1" into the input field labeled "The current crf version"
     Then I click on the button labeled "Save"
-    Then I should see "Versioning - v1.1.1"
+    Then I should see "Versioning - v1.1.2"
     When I click on the link labeled "Versioning"
     Then I should see "The current version is 1"
 
@@ -78,7 +81,7 @@ Feature: E.122.700 - The system shall support the ability to setup CRF versionin
     When I click on the link labeled "My Projects"
     And I click on the link labeled "E.122.700"
     Then I should see "Project Home and Design"
-    When I click on the link labeled "Manage"
+    When I click on the second link labeled "Manage"
     Then I should see "External Modules - Project Module Manager"
     # E.122.900 - Only Super-admins can configure external Module
     #And I should NOT see the button labeled "Disable"
@@ -118,12 +121,12 @@ Feature: E.122.700 - The system shall support the ability to setup CRF versionin
     And I click on the link labeled "E.122.700"
     
     #E.122.800 - Configure Versioning field as readonly
-    Given I click on the link labeled "Manage"
+    Given I click on the second link labeled "Manage"
     Then I should see "External Modules - Project Module Manager"
     And I click on the button labeled "Configure"
     And I check the checkbox labeled "If checked, any fields identified as versioning fields will be automatically set as readonly"
     And I click on the button labeled "Save"
-    Then I should see "Versioning - v1.1.1"
+    Then I should see "Versioning - v1.1.2"
 
     # Version number should be an integer
     Given I click on the link labeled "Versioning"
@@ -172,13 +175,13 @@ Feature: E.122.700 - The system shall support the ability to setup CRF versionin
     And I click on the button labeled "Cancel"
 
     # Updating the version number in the configuration settings
-    Given I click on the link labeled "Manage"
+    Given I click on the second link labeled "Manage"
     Then I should see "External Modules - Project Module Manager"
     And I click on the button labeled "Configure"
     Then I should see "3"
     When I clear field and enter "5" into the input field labeled "The current crf version"
     And I click on the button labeled "Save"
-    Then I should see "Versioning - v1.1.1"
+    Then I should see "Versioning - v1.1.2"
 
   Scenario: E.122.1000, E.122.1100 - Versioning for Repeating Instruments in Arm 1
     # Repeating Instruments - Instance 1
@@ -229,22 +232,22 @@ Feature: E.122.700 - The system shall support the ability to setup CRF versionin
 
   Scenario: E.122.100 - Disable external module
     # Disable external module in project
-    Given I click on the link labeled "Manage"
+    Given I click on the second link labeled "Manage"
     Then I should see "External Modules - Project Module Manager"
-    And I should see "Versioning - v1.1.1"
+    And I should see "Versioning - v1.1.2"
     When I click on the button labeled "Disable"
     Then I should see "Disable module?"
     When I click on the button labeled "Disable module"
-    Then I should NOT see "Versioning - v1.1.1"
+    Then I should NOT see "Versioning - v1.1.2"
 
     Given I click on the link labeled "Logging"
     Then I should see a table header and row containing the following values in the logging table:
       | Time / Date      | Username   | Action                                                                   | List of Data Changes OR Fields Exported                                                                                             |
-      | mm/dd/yyyy hh:mm | test_admin | Disable external module "versioning_v1.1.1" for project                  |                                                                                                                                     |
-      | mm/dd/yyyy hh:mm | test_admin | Modify configuration for external module "versioning_v1.1.1" for project | version-field-auto-set-as-readonly                                                                                                  |
-      | mm/dd/yyyy hh:mm | test_admin | Modify configuration for external module "versioning_v1.1.1" for project | current-project-version                                                                                                             |
-      | mm/dd/yyyy hh:mm | test_admin | Modify configuration for external module "versioning_v1.1.1" for project | reserved-hide-from-non-admins-in-project-list, versioning-field-suffix, current-project-version, version-field-auto-set-as-readonly |
-      | mm/dd/yyyy hh:mm | test_admin | Enable external module "versioning_v1.1.1" for project                   |                                                                                                                                     |
+      | mm/dd/yyyy hh:mm | test_admin | Disable external module "versioning_v1.1.2" for project                  |                                                                                                                                     |
+      | mm/dd/yyyy hh:mm | test_admin | Modify configuration for external module "versioning_v1.1.2" for project | version-field-auto-set-as-readonly                                                                                                  |
+      | mm/dd/yyyy hh:mm | test_admin | Modify configuration for external module "versioning_v1.1.2" for project | current-project-version                                                                                                             |
+      | mm/dd/yyyy hh:mm | test_admin | Modify configuration for external module "versioning_v1.1.2" for project | reserved-hide-from-non-admins-in-project-list, versioning-field-suffix, current-project-version, version-field-auto-set-as-readonly |
+      | mm/dd/yyyy hh:mm | test_admin | Enable external module "versioning_v1.1.2" for project                   |                                                                                                                                     |
 
     # Disable external module in Control Center
     Given I click on the link labeled "Control Center"
@@ -252,7 +255,7 @@ Feature: E.122.700 - The system shall support the ability to setup CRF versionin
     And I click on the button labeled "Disable"
     Then I should see "Disable module?"
     When I click on the button labeled "Disable module"
-    Then I should NOT see "Versioning - v1.1.1"
+    Then I should NOT see "Versioning - v1.1.2"
 
     # Not checking 'Delete Version' for now as this is used for deleting lower versions.
     # If the entire EM is deleted REDCap throws an error
@@ -260,11 +263,11 @@ Feature: E.122.700 - The system shall support the ability to setup CRF versionin
     Given I click on the link labeled "User Activity Log"
     Then I should see a table header and row containing the following values in a table:
       | Time             | User       | Event                                                                    |
-      | mm/dd/yyyy hh:mm | test_admin | Disable external module "versioning_v1.1.1" for system                   |
-      | mm/dd/yyyy hh:mm | test_admin | Disable external module "versioning_v1.1.1" for project                  |
-      | mm/dd/yyyy hh:mm | test_admin | Modify configuration for external module "versioning_v1.1.1" for project |
-      | mm/dd/yyyy hh:mm | test_admin | Enable external module "versioning_v1.1.1" for project                   |
-      | mm/dd/yyyy hh:mm | test_admin | Enable external module "versioning_v1.1.1" for system                    |
+      | mm/dd/yyyy hh:mm | test_admin | Disable external module "versioning_v1.1.2" for system                   |
+      | mm/dd/yyyy hh:mm | test_admin | Disable external module "versioning_v1.1.2" for project                  |
+      | mm/dd/yyyy hh:mm | test_admin | Modify configuration for external module "versioning_v1.1.2" for project |
+      | mm/dd/yyyy hh:mm | test_admin | Enable external module "versioning_v1.1.2" for project                   |
+      | mm/dd/yyyy hh:mm | test_admin | Enable external module "versioning_v1.1.2" for system                    |
     
     When I click on the link labeled "View Logs"
     Then I should see "External Module Logs"
@@ -281,8 +284,14 @@ Feature: E.122.700 - The system shall support the ability to setup CRF versionin
     And I should see a table header and row containing the following values in a table:
       | Name        | Value               |
       | old_version | 1                   |
+    And I should see a table header and row containing the following values in a table:
+      | Name        | Value               |
       | updated_at  | yyyy-mm-dd hh:mm:ss |
+    And I should see a table header and row containing the following values in a table:
+      | Name        | Value               |
       | new_version | 3                   |
+    And I should see a table header and row containing the following values in a table:
+      | Name        | Value               |
       | updated_by  | test_admin          |
 
     And I click on the button labeled "Close"
