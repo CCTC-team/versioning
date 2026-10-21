@@ -273,11 +273,11 @@ Feature: E.122.700 - The system shall support the ability to setup CRF versionin
     Then I should see "External Module Logs"
     And I should see a table header and row containing the following values in a table:
       | Date/Time           | Module     | Project | Message                           | UserName   |
-      | yyyy-mm-dd hh:mm:ss | versioning |         | Piping code inserted successfully | Test_Admin |
-      | yyyy-mm-dd hh:mm:ss | versioning | 13      | Version updated                   | Test_Admin |
-      | yyyy-mm-dd hh:mm:ss | versioning | 13      | Configuration changed (project)   | Test_Admin |
       | yyyy-mm-dd hh:mm:ss | versioning |         | Piping code removed successfully  | Test_Admin |
       | yyyy-mm-dd hh:mm:ss | versioning |         | Module system disable initiated   | Test_Admin |
+      | yyyy-mm-dd hh:mm:ss | versioning | 13      | Configuration changed (project)   | Test_Admin |
+      | yyyy-mm-dd hh:mm:ss | versioning | 13      | Version updated                   | Test_Admin |
+      | yyyy-mm-dd hh:mm:ss | versioning |         | Piping code inserted successfully | Test_Admin |
 
     When I click on the fourth button labeled "Show Parameters"
     Then I should see "Log Entry Parameters"
@@ -295,7 +295,7 @@ Feature: E.122.700 - The system shall support the ability to setup CRF versionin
       | updated_by  | test_admin          |
 
     And I click on the button labeled "Close"
-    When I enter "2" into the input field labeled "Page"
+    When I click on the link labeled "Next"
     Then I should see "External Module Logs"
     And I should see a table header and row containing the following values in a table:
       | Date/Time           | Module     | Project | Message                           | UserName   |
