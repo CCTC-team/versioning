@@ -20,7 +20,7 @@ Enabling the module at a system level will AUTOMATICALLY do the following via th
 
 1. Insert code in the `Piping.php` file - the block below is inserted into the `switch ($value)` block in
    `Piping::pipeSpecialTags()`, immediately after the `break;` that closes `case "mycap-participant-link" :`.
-   That `break;` is at line 2035 in REDCap 14.7.0, 2073 in 15.5.36 and 2180 in 16.0.38 — the module locates it
+   That `break;` is at line 2035 in REDCap 14.7.0, 2073 in 15.5.36 and 2242 in 17.5.6 — the module locates it
    by searching for the surrounding code, not by line number.
     ```php
     //****** inserted by Versioning module ******
