@@ -10,7 +10,7 @@ The Versioning module is a REDCap External Module that enables project designers
 |----------|-------|
 | **Namespace** | `CCTC\VersioningModule` |
 | **Framework Version** | 14 |
-| **Tested With** | PHP 8.2; REDCap 13.8.1, 14.7.0, 15.5.36, 17.5.6 (no version limits set in `config.json`) |
+| **Tested With** | PHP 8.2; REDCap 13.8.1, 14.7.0, 15.5.36, 17.5.6, 17.5.9 (no version limits set in `config.json`) |
 
 ## Authors
 
